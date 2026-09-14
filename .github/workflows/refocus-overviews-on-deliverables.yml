@@ -1,0 +1,64 @@
+name: Refocus project summaries on deliverables
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/refocus-overviews-on-deliverables.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Refocus overview copy
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+
+          # Labels: emphasize what was done and what was delivered.
+          s=s.replace('项目职责</div><div class="overview-text">','完成工作</div><div class="overview-text">')
+          s=s.replace('核心需求 / 问题</div><div class="overview-text">','项目目标</div><div class="overview-text">')
+          s=s.replace('项目结果</div><div class="overview-text">','项目产出</div><div class="overview-text">')
+
+          replacements={
+          # AI
+          '案头研究 · 竞争分析 · 消费者任务 · 机会判断':'整理公开市场资料 · 完成竞争格局分析 · 任务分群 · 机会矩阵',
+          '什么样的 AI 价值值得消费者付费？':'识别消费级 AI 的付费机会。',
+          '识别专业工作流为当前更清晰的商业化机会，并提出“潜在需求激活”与“个性化互动娱乐”。':'完成消费级 AI 市场机会分析：任务分群、竞争格局、机会矩阵与下一增长假设。',
+
+          # GODIVA
+          '市场诊断 · 消费者旅程分析 · 本地化策略 · 活动设计':'完成市场与竞品分析 · 消费者旅程诊断 · 本地化策略 · 活动方案',
+          '如何把全球品牌资产转化为英国本地价值？':'提升英国市场本地相关性并修复消费体验。',
+          '形成“修复体验 × 建立本地相关性 × 建立持续关系”策略，并提出 GODIVA TEA TIME。':'完成 GODIVA UK 本地化品牌方案：三项策略框架、GODIVA TEA TIME 活动与衡量指标。',
+
+          # H&M × UNIQLO
+          '社媒对比 · 平台角色 · 消费者旅程 · 社交商务策略':'完成双品牌社媒内容与数据对比 · 平台角色分析 · 消费者旅程梳理 · 优化方案',
+          '如何同时提升注意力、转化与长期关系？':'优化社交媒体从触达到留存的完整路径。',
+          'H&amp;M 强在注意力，UNIQLO 强在降低购买摩擦；形成“发现 → 考虑 → 转化 → 履约 → 留存”路径。':'完成 H&amp;M × UNIQLO 社媒策略对比与优化方案：平台分工、线上线下衔接与“发现 → 考虑 → 转化 → 履约 → 留存”路径。',
+
+          # Dissertation
+          '实验设计 · 问卷收集 · 数据清洗 · SPSS · 中介分析':'独立完成两组实验 · 漫画刺激 · 问卷收集 · 数据清洗 · SPSS 分析',
+          '故事质量如何通过叙事传输影响购买意愿？':'检验故事质量、叙事传输与购买意愿的关系。',
+          '165 份有效样本；高质量故事显著提升叙事传输与购买意愿；叙事传输发挥部分中介作用。':'完成 165 份有效样本分析；验证高质量故事显著提升叙事传输与购买意愿，叙事传输发挥部分中介作用。'
+          }
+          for a,b in replacements.items():
+              s=s.replace(a,b)
+
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit update
+        shell: bash
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Refocus project summaries on completed work and deliverables"
+          git push
