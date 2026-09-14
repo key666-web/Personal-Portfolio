@@ -1,0 +1,65 @@
+name: Compact project overviews
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/compact-project-overviews.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Simplify overview layout and copy
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+
+          # Replace old overview CSS with a cleaner two-level hierarchy.
+          s=re.sub(r'\.project-overview\{[^}]*\}\.overview-row\{[^}]*\}\.overview-label\{[^}]*\}\.overview-text\{[^}]*\}\.overview-row\.result \.overview-label\{[^}]*\}\.overview-row\.result \.overview-text\{[^}]*\}@media\(max-width:720px\)\{\.overview-row\{[^}]*\}\}',
+          '.project-overview{margin-top:30px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:none}.overview-row{background:var(--p);border:1px solid var(--l);border-radius:16px;padding:18px;min-height:138px;display:flex;flex-direction:column;justify-content:space-between}.overview-label{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--u)}.overview-text{font-size:16px;font-weight:700;color:var(--i);line-height:1.45;letter-spacing:-.01em}.overview-row.result{background:#151515;border-color:#151515}.overview-row.result .overview-label{color:#8093ff}.overview-row.result .overview-text{color:#fff}@media(max-width:900px){.project-overview{grid-template-columns:1fr 1fr}}@media(max-width:520px){.project-overview{grid-template-columns:1fr}.overview-row{min-height:auto}}', s, count=1)
+
+          replacements = {
+          '生成式 AI 进入日常使用，通用能力快速免费化。项目希望判断消费级 AI 中哪些任务仍能形成付费价值，以及下一阶段可能出现的增量机会。':'AI 基础能力快速免费化，付费理由正在重新分化。',
+          '独立开展案头研究，整理 QuestMobile、Menlo Ventures、Sensor Tower 及产品公开信息；分析消费者任务、付费逻辑与竞争格局，并构建机会矩阵。':'案头研究 · 竞争分析 · 消费者任务 · 机会判断',
+          '当基础能力越来越免费，消费者为什么还要付费？专业 AI 如何建立差异化？哪些需求最值得优先进入？':'什么样的 AI 价值值得消费者付费？',
+          '形成以任务价值、使用频率、免费替代程度和工作流深度为核心的判断框架；识别专业工作流为当前较清晰的商业化机会，并提出“潜在需求激活”与“个性化互动娱乐”两项延伸判断。':'识别专业工作流为当前更清晰的商业化机会，并提出“潜在需求激活”与“个性化互动娱乐”。',
+
+          'GODIVA 拥有全球高端品牌资产，但在英国市场的搜索关注、官网访问、市场份额与消费者评分均偏弱，需要判断问题究竟来自曝光、相关性还是实际体验。':'英国市场品牌存在感、本地相关性与消费体验均偏弱。',
+          '独立梳理市场与竞品信息，分析消费者评价与数字表现，沿消费者旅程诊断关键断点，并形成本地化品牌策略与营销活动方案。':'市场诊断 · 消费者旅程分析 · 本地化策略 · 活动设计',
+          '如何把全球品牌传统转化为英国消费者能够理解和感知的本地价值，同时修复购买后的高端体验落差？':'如何把全球品牌资产转化为英国本地价值？',
+          '形成“修复体验 × 建立本地相关性 × 建立持续关系”的策略框架，提出 GODIVA TEA TIME 核心活动，并设置品牌搜索、消费者评分与市场份额等衡量指标。':'形成“修复体验 × 建立本地相关性 × 建立持续关系”策略，并提出 GODIVA TEA TIME。',
+
+          'H&amp;M 与 UNIQLO 同时经营 Instagram 和 TikTok，但在互动、触达、内容逻辑与购买路径上呈现明显差异。':'H&amp;M 与 UNIQLO 的社媒表现与消费者路径明显分化。',
+          '对比两品牌的社交媒体内容与数字表现，分析平台角色、消费者旅程和社交商务路径，并基于原分析进一步形成品牌级优化建议。':'社媒对比 · 平台角色 · 消费者旅程 · 社交商务策略',
+          '为什么相同平台会产生不同结果？如何在注意力、实用价值、转化与长期关系之间形成更完整的社交媒体系统？':'如何同时提升注意力、转化与长期关系？',
+          '识别 H&amp;M 强于获得注意力与参与、UNIQLO 强于降低购买摩擦；进一步形成平台分工、线上线下衔接与留存建议，并构建“发现 → 考虑 → 转化 → 履约 → 留存”的社交商务路径。':'H&amp;M 强在注意力，UNIQLO 强在降低购买摩擦；形成“发现 → 考虑 → 转化 → 履约 → 留存”路径。',
+
+          '现有网红故事营销研究更多比较“有故事 / 无故事”，对故事质量如何影响消费者反应的关注相对不足。':'研究缺口：相比“有无故事”，故事质量的影响更少被检验。',
+          '独立设计两组实验与漫画刺激，开展问卷收集与数据清洗，并使用 SPSS 完成信度、组间差异、回归与中介分析。':'实验设计 · 问卷收集 · 数据清洗 · SPSS · 中介分析',
+          '高质量故事是否会提升叙事传输与购买意愿？叙事传输是否在故事质量与购买意愿之间发挥中介作用？':'故事质量如何通过叙事传输影响购买意愿？',
+          '获得 165 份有效样本；高质量故事显著提升叙事传输与购买意愿；叙事传输发挥部分中介作用，间接效应为 1.462，95% Bootstrap CI [.218, 2.293]。':'165 份有效样本；高质量故事显著提升叙事传输与购买意愿；叙事传输发挥部分中介作用。'
+          }
+          for a,b in replacements.items():
+              s=s.replace(a,b)
+
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit update
+        shell: bash
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Simplify project overview hierarchy and copy"
+          git push
