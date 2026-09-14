@@ -1,0 +1,89 @@
+name: Update GODIVA journey and H&M Chinese copy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/update-journey-hm-cn.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update portfolio copy
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+
+          # GODIVA: replace the old forward-looking journey with a diagnosis based on evidence.
+          s=s.replace('<a href="#g6">06 消费者路径</a>','<a href="#g6">06 旅程诊断</a>')
+          start=s.find('<div class="block" id="g6">')
+          end=s.find('<div class="block" id="g7">', start)
+          if start!=-1 and end!=-1:
+              new_g6='''<div class="block" id="g6"><div class="s lay"><div class="lab">06 / JOURNEY DIAGNOSIS</div><div class="ct"><h2>沿消费者旅程定位 GODIVA 的两个关键断点。</h2><p>我没有把英国市场问题只看成曝光不足，而是沿消费者旅程检查品牌从被看见到再次购买的关键阶段。</p><div class="grid4"><div class="box"><em>认知 / 兴趣</em><h3>品牌可见度不足</h3><p>搜索关注低、本地存在感弱。<br/><b>关键问题：</b>为什么要注意 GODIVA？</p></div><div class="box"><em>考虑</em><h3>本地相关性不足</h3><p>品牌传统清晰，但与英国消费者熟悉的消费场景连接不足。<br/><b>关键问题：</b>为什么与我有关？</p></div><div class="box"><em>购买 / 履约</em><h3>高端体验不一致</h3><p>包装、配送与客服问题削弱高端价值感知。<br/><b>关键问题：</b>高端价格是否匹配实际体验？</p></div><div class="box"><em>复购 / 留存风险</em><h3>负面体验可能影响再次购买</h3><p>现有低评分说明购买后的体验存在风险，但项目没有直接测量留存率。<br/><b>关键问题：</b>第一次购买后，为什么还要回来？</p></div></div><div class="ins key">我的判断：前端是“相关性”问题，后端是“体验”问题，因此不能只靠增加曝光解决。</div><div class="duo"><div class="box"><em>前端策略回应</em><h3>GODIVA TEA TIME</h3><p>用英国下午茶这一熟悉场景，把品牌传统转化为更容易理解和记住的本地价值。</p></div><div class="box"><em>后端策略回应</em><h3>修复购买体验</h3><p>改善包装、配送、订单追踪、客服与补偿机制，让实际体验重新匹配高端定位。</p></div></div><div class="src">关系延伸应建立在体验修复之后：先解决购买后的负面体验，再通过会员与 CRM 承接复购，而不是在体验问题未解决时先做留存。</div></div></div></div>'''
+              s=s[:start]+new_g6+s[end:]
+
+          # H&M × UNIQLO: Chinese-first expression; keep brand/platform/proper terms when useful.
+          replacements={
+            'Trend → Creator → Participation → Conversion':'趋势 → 创作者 → 参与 → 转化',
+            'LifeWear → Utility → Guidance → Relationship':'LifeWear → 实用价值 → 购买指导 → 长期关系',
+            'Social media performance is a system-fit problem.':'社交媒体表现，本质上是系统匹配问题。',
+            'Attention ≠ Sustainable System':'注意力 ≠ 可持续系统',
+            'Utility ≠ Engagement':'实用价值 ≠ 用户参与',
+            'Reach ≠ Meaningful Engagement':'触达 ≠ 有效互动',
+            'H&amp;M wins attention. UNIQLO reduces friction. Neither alone represents a complete social system.':'H&amp;M 擅长获得注意力，UNIQLO 擅长降低购买摩擦，但两者都还不是完整的社交媒体系统。',
+            'DISCOVER + PARTICIPATE':'发现 + 参与',
+            'CONSIDER + LEARN':'考虑 + 了解',
+            'CONVERT + RETAIN':'转化 + 留存',
+            'FULFIL + EXPERIENCE':'履约 + 体验',
+            'Keep the energy. Build the system.':'保留内容活力，补全消费者路径。',
+            'Keep the utility. Make it platform-native.':'保留实用价值，让内容真正适配平台。',
+            'The strongest social strategy does not choose between engagement and conversion. It gives every platform a clear role in the customer journey.':'最强的社交媒体策略不是在互动与转化之间二选一，而是让每个平台在消费者旅程中承担清晰角色。'
+          }
+          for a,b in replacements.items():
+              s=s.replace(a,b)
+
+          # Platform-role copy.
+          s=s.replace('Trend、Creator、娱乐性内容、挑战与 UGC，负责获得注意力和参与。','趋势内容、内容创作者、娱乐性表达、挑战与 UGC，负责获得注意力和参与。')
+          s=s.replace('穿搭灵感、产品教育、Carousel 与可收藏内容，帮助消费者形成选择。','穿搭灵感、产品教育、轮播内容与可收藏信息，帮助消费者形成选择。')
+          s=s.replace('产品详情、会员、个性化和 CRM，负责完成购买并沉淀关系。','产品详情、会员、个性化与 CRM，负责完成购买并沉淀关系。')
+          s=s.replace('库存查询、Click &amp; Collect 与门店体验，把数字兴趣转化为真实消费。','库存查询、到店自提与门店体验，把线上兴趣转化为真实消费。')
+
+          # H&M recommendations.
+          s=s.replace('<em>KEEP</em><h3>Creator-led Activation</h3><p>保留 Trend、Creator、Collaboration 与参与机制，这是 H&amp;M 制造注意力的优势。</p>', '<em>保留</em><h3>创作者驱动的激活</h3><p>保留趋势内容、内容创作者、联名与参与机制，这是 H&amp;M 制造注意力的优势。</p>')
+          s=s.replace('<em>BUILD</em><h3>Stable Brand Meaning</h3><p>增加 styling education、saveable content 与长期有效的 fashion guidance。</p>', '<em>建立</em><h3>稳定的品牌意义</h3><p>增加穿搭教育、可收藏内容与长期有效的穿搭指导，减少对短期热点的依赖。</p>')
+          s=s.replace('<em>CLOSE</em><h3>O2O Loop</h3><p>补齐 Social → Product → Local Stock → Store / Pickup 的闭环。</p>', '<em>补齐</em><h3>线上线下闭环</h3><p>补齐社交内容 → 产品页 → 本地库存 → 门店 / 到店自提的路径。</p>')
+          s=s.replace('<em>SHIFT</em><h3>Reach → Relationship</h3><p>减少只看曝光和短期互动，更关注保存、回访、会员与复购。</p>', '<em>转向</em><h3>从触达到长期关系</h3><p>减少只看曝光和短期互动，更关注保存、回访、会员与复购。</p>')
+
+          # UNIQLO recommendations.
+          s=s.replace('<em>KEEP</em><h3>LifeWear + Utility</h3><p>保留功能价值与稳定品牌语言，不为了短期流量丢掉核心资产。</p>', '<em>保留</em><h3>LifeWear + 实用价值</h3><p>保留功能价值与稳定品牌语言，不为了短期流量丢掉核心资产。</p>')
+          s=s.replace('<em>ADAPT</em><h3>Problem → Creator → Solution</h3><p>把产品功能改写成更符合 TikTok 的情境化、问题解决型表达。</p>', '<em>适配</em><h3>问题 → 创作者 → 解决方案</h3><p>把产品功能改写成更符合 TikTok 的情境化、问题解决型表达。</p>')
+          s=s.replace('<em>ACTIVATE</em><h3>StyleHint as Participation</h3><p>把 StyleHint 从穿搭工具进一步转化为 Creator styling → User recreation → Upload 的参与机制。</p>', '<em>激活</em><h3>让 StyleHint 成为参与机制</h3><p>把 StyleHint 从穿搭工具进一步转化为“创作者示范 → 用户复刻 → 上传分享”的参与路径。</p>')
+          s=s.replace('<em>CONNECT</em><h3>Utility → Community → Commerce</h3><p>在已有低摩擦购买路径上补强社群参与与情绪激活。</p>', '<em>连接</em><h3>实用价值 → 社区参与 → 商业转化</h3><p>在已有低摩擦购买路径上补强社群参与与情绪激活。</p>')
+
+          # Ideal social commerce path.
+          s=s.replace('DISCOVER<br/><small>TikTok</small>','发现<br/><small>TikTok</small>')
+          s=s.replace('CONSIDER<br/><small>Instagram</small>','考虑<br/><small>Instagram</small>')
+          s=s.replace('CONVERT<br/><small>Website / App</small>','转化<br/><small>Website / App</small>')
+          s=s.replace('FULFIL<br/><small>Store</small>','履约<br/><small>Store</small>')
+          s=s.replace('RETAIN<br/><small>CRM / Membership</small>','留存<br/><small>CRM / 会员</small>')
+          s=s.replace('真正完整的 social commerce system，不应该止于 engagement，而应该把社交内容继续连接到购买、履约与长期关系。','完整的社交商务系统不应停留在互动，而应继续连接购买、履约与长期关系。')
+
+          p.write_text(s,encoding='utf-8')
+          PY
+      - name: Commit update
+        shell: bash
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Refine GODIVA journey diagnosis and localize H&M copy"
+          git push
