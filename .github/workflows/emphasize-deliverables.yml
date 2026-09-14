@@ -1,0 +1,75 @@
+name: Emphasize project deliverables
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/emphasize-deliverables.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update project overview hierarchy
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          # Stronger hierarchy: three compact context cards + one dominant deliverable block.
+          s = re.sub(
+              r'\.project-overview\{[^}]*\}\.overview-row\{[^}]*\}\.overview-label\{[^}]*\}\.overview-text\{[^}]*\}\.overview-row\.result\{[^}]*\}\.overview-row\.result \.overview-label\{[^}]*\}\.overview-row\.result \.overview-text\{[^}]*\}@media\(max-width:900px\)\{\.project-overview\{[^}]*\}\}@media\(max-width:520px\)\{\.project-overview\{[^}]*\}\.overview-row\{[^}]*\}\}',
+              '.project-overview{margin-top:30px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:none}.overview-row{background:var(--p);border:1px solid var(--l);border-radius:15px;padding:16px 18px;min-height:108px}.overview-label{font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--u);margin-bottom:10px}.overview-text{font-size:14px;font-weight:650;color:var(--i);line-height:1.5}.overview-row.result{grid-column:1/-1;background:#151515;border-color:#151515;min-height:auto;padding:24px 26px}.overview-row.result .overview-label{color:#8093ff;margin-bottom:12px}.overview-row.result .overview-text{color:#fff;font-size:14px;font-weight:500}.overview-row.result .overview-text strong{display:block;font-size:clamp(24px,3vw,34px);line-height:1.18;letter-spacing:-.035em;margin-bottom:10px}.overview-row.result .overview-text span{display:block;color:#aaa;font-size:12px;line-height:1.55;font-weight:500}@media(max-width:900px){.project-overview{grid-template-columns:1fr 1fr}.overview-row.result{grid-column:1/-1}}@media(max-width:520px){.project-overview{grid-template-columns:1fr}.overview-row{min-height:auto}.overview-row.result{grid-column:1}}',
+              s,
+              count=1
+          )
+
+          # Make context concise and deliverables explicit.
+          replacements = {
+              # AI
+              'AI 基础能力快速免费化，付费理由正在重新分化。':'AI 基础能力快速免费化，消费级付费机会重新分化。',
+              '整理公开市场资料 · 完成竞争格局分析 · 任务分群 · 机会矩阵':'市场资料整理 · 竞争格局分析 · 任务分群 · 机会矩阵',
+              '识别消费级 AI 的付费机会。':'识别消费级 AI 可持续付费机会。',
+              '完成消费级 AI 市场机会分析：任务分群、竞争格局、机会矩阵与下一增长假设。':'<strong>完成消费级 AI 市场机会分析</strong><span>任务分群 · 竞争格局 · 机会矩阵 · 下一增长假设</span>',
+
+              # GODIVA
+              '英国市场品牌存在感、本地相关性与消费体验均偏弱。':'英国市场品牌存在感、本地相关性与消费体验偏弱。',
+              '完成市场与竞品分析 · 消费者旅程诊断 · 本地化策略 · 活动方案':'市场与竞品分析 · 消费者旅程诊断 · 本地化策略 · 活动方案',
+              '提升英国市场本地相关性并修复消费体验。':'提升本地相关性，修复高端消费体验。',
+              '完成 GODIVA UK 本地化品牌方案：三项策略框架、GODIVA TEA TIME 活动与衡量指标。':'<strong>完成 GODIVA UK 本地化品牌方案</strong><span>体验修复 · 本地相关性 · GODIVA TEA TIME · 衡量指标</span>',
+
+              # H&M x UNIQLO
+              'H&amp;M 与 UNIQLO 的社媒表现与消费者路径明显分化。':'H&amp;M 与 UNIQLO 的社媒表现与消费者路径存在明显差异。',
+              '完成双品牌社媒内容与数据对比 · 平台角色分析 · 消费者旅程梳理 · 优化方案':'双品牌社媒对比 · 平台角色分析 · 消费者旅程 · 优化方案',
+              '优化社交媒体从触达到留存的完整路径。':'优化从触达到留存的社交媒体路径。',
+              '完成 H&amp;M × UNIQLO 社媒策略对比与优化方案：平台分工、线上线下衔接与“发现 → 考虑 → 转化 → 履约 → 留存”路径。':'<strong>完成 H&amp;M × UNIQLO 社交媒体策略对比与优化方案</strong><span>平台分工 · 线上线下衔接 · 发现 → 考虑 → 转化 → 履约 → 留存</span>',
+
+              # Research
+              '研究缺口：相比“有无故事”，故事质量的影响更少被检验。':'故事质量对消费者反应的影响缺少直接检验。',
+              '独立完成两组实验 · 漫画刺激 · 问卷收集 · 数据清洗 · SPSS 分析':'两组实验 · 漫画刺激 · 问卷收集 · 数据清洗 · SPSS 分析',
+              '检验故事质量、叙事传输与购买意愿的关系。':'检验故事质量如何影响叙事传输与购买意愿。',
+              '完成 165 份有效样本分析；验证高质量故事显著提升叙事传输与购买意愿，叙事传输发挥部分中介作用。':'<strong>完成网红故事营销实验研究与数据分析</strong><span>165 份有效样本 · SPSS · 高质量故事显著提升叙事传输与购买意愿 · 部分中介</span>'
+          }
+
+          for old, new in replacements.items():
+              s = s.replace(old, new)
+
+          p.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit changes
+        shell: bash
+        run: |
+          if git diff --quiet; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Make project deliverables the primary overview focus"
+          git push
