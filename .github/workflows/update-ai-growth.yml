@@ -1,0 +1,50 @@
+name: Update AI growth hypothesis
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/update-ai-growth.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Rewrite AI growth hypothesis section
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('index.html')
+          s = path.read_text(encoding='utf-8')
+
+          css = r'''.logic-flow{margin-top:26px;border-top:1px solid var(--l)}.logic-step{display:grid;grid-template-columns:150px 1fr;gap:26px;padding:30px 0;border-bottom:1px solid var(--l)}.logic-label{font-size:10px;letter-spacing:.12em;color:var(--u);font-weight:800;padding-top:5px}.logic-body h3{font-size:clamp(22px,3vw,34px);letter-spacing:-.04em;line-height:1.15;margin:0 0 10px}.logic-body p{max-width:790px;color:#595b56;line-height:1.75;margin:0}.logic-arrow{margin:0 0 0 176px;color:var(--u);font-size:24px;line-height:1}.logic-hyp{background:var(--p);margin:18px -20px;padding:30px 20px;border:1px solid var(--l);border-radius:18px}.logic-evidence{margin-top:14px;padding:12px 14px;background:#ebe9e2;border-radius:12px;color:#555;font-size:11px;line-height:1.6}.logic-why{font-size:12px;font-weight:800;color:var(--i);margin-top:15px}.logic-implication{margin-top:26px;border-left:3px solid var(--u);padding:10px 0 10px 16px}.logic-implication b{display:block;font-size:22px;letter-spacing:-.03em;margin-bottom:7px}.logic-implication span{color:var(--m);font-size:12px;line-height:1.6}@media(max-width:720px){.logic-step{grid-template-columns:1fr;gap:8px}.logic-arrow{margin-left:0}.logic-hyp{margin:12px 0;padding:22px 18px}}'''
+          if '.logic-flow{' not in s:
+              marker = '@media(max-width:720px)'
+              s = s.replace(marker, css + marker, 1)
+
+          start = s.index('<div class="block" id="a7">')
+          end_marker = '</section><section class="case" id="cg">'
+          end = s.index(end_marker, start)
+
+          new = r'''<div class="block" id="a7"><div class="s lay"><div class="lab">07 / NEXT GROWTH HYPOTHESIS</div><div class="ct"><h2>下一轮消费级 AI 增量，可能来自“个性化互动娱乐”。</h2><div class="logic-flow"><div class="logic-step"><div class="logic-label">01 / 现在的事实</div><div class="logic-body"><h3>生产力 AI 已经表现出更明确的付费逻辑。</h3><p>在 Coding、数据分析、设计和复杂办公等场景中，AI 能直接节省时间并改善任务结果，因此用户更容易理解为什么需要付费。</p></div></div><div class="logic-step"><div class="logic-label">02 / 早期市场信号</div><div class="logic-body"><h3>互动型 AI 已经开始出现真实收入增长。</h3><p>Sensor Tower 显示，AI Companion 在 2026 Q1 收入约 1.5 亿美元，较 2023 Q1 扩大超过 12 倍。</p><div class="logic-evidence">这说明持续互动型 AI 已经出现付费行为，但不能据此判断消费者会普遍为“AI 情感陪伴”本身付费。</div><div class="src">Source: <a href="https://sensortower.com/blog/state-of-ai-apps-in-apac-2026-report" target="_blank" rel="noopener">Sensor Tower, State of AI Apps 2026: APAC Edition</a>.</div></div></div><div class="logic-step logic-hyp"><div class="logic-label">03 / 我的预测</div><div class="logic-body"><h3>下一轮机会未必是“AI 陪伴”，而可能是 AI 驱动的个性化互动娱乐。</h3><p>用户购买的不是单纯聊天或情感陪伴，而是传统内容产品难以提供的持续变化的个人化体验，例如剧情根据用户选择发展、角色记住过去的互动，以及内容根据个人历史持续生成。</p></div></div><div class="logic-step"><div class="logic-label">04 / 为什么可能成立</div><div class="logic-body"><h3>AI 正在改变个性化内容的成本结构。</h3><p>传统娱乐中，个性化程度越高，通常意味着投入更多创作资源，因此很难同时实现一对一体验和大规模生产。生成式 AI 则可能让同一套内容系统根据不同用户持续生成不同体验。</p><div class="ins">当个性化不再意味着同比例增加制作成本时，一对一娱乐体验才具备大规模商业化的可能。</div></div></div></div><div class="logic-implication"><b>市场可能从“所有人消费同一套内容”，逐渐出现“每个人拥有不同版本的内容”。</b><span>这是基于当前市场信号和生成式内容能力提出的前瞻性判断，而不是确定性结论。</span></div></div></div></div>'''
+
+          s = s[:start] + new + s[end:]
+          path.write_text(s, encoding='utf-8')
+          PY
+      - name: Commit update
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Clarify AI growth hypothesis logic"
+          git push
