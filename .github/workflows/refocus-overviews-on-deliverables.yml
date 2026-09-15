@@ -1,4 +1,4 @@
-name: Balance case typography
+name: Fix inline question typography
 
 on:
   push:
@@ -14,15 +14,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Balance case title sizes
+      - name: Fix oversized inline labels inside cards
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          css = '/* TYPOGRAPHY_BALANCE_V3 */.case .ct h2{font-size:clamp(28px,3vw,40px)!important;line-height:1.08!important;letter-spacing:-.035em!important;max-width:900px}.case .core-conclusion .ct h2{font-size:clamp(32px,3.6vw,46px)!important;line-height:1.08!important;max-width:900px}.case .logic-body h3{font-size:clamp(20px,2.1vw,28px)!important;line-height:1.2!important;letter-spacing:-.025em!important}.case .overview-row.result .overview-text strong{font-size:clamp(24px,2.5vw,32px)!important;line-height:1.18!important}@media(max-width:720px){.case .ct h2{font-size:clamp(27px,7.5vw,36px)!important}.case .core-conclusion .ct h2{font-size:clamp(30px,8vw,40px)!important}}'
-          if '/* TYPOGRAPHY_BALANCE_V3 */' not in s:
+          css = '/* INLINE_LABEL_FIX_V1 */.case .box p b{display:inline!important;font-size:inherit!important;line-height:inherit!important;letter-spacing:0!important;margin:0!important;font-weight:800!important;color:inherit!important}'
+          if '/* INLINE_LABEL_FIX_V1 */' not in s:
               s = s.replace('</style>', css + '</style>', 1)
           p.write_text(s, encoding='utf-8')
           PY
@@ -33,5 +33,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Balance case typography scale"
+          git commit -m "Fix oversized key question labels"
           git push
