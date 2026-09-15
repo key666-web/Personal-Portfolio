@@ -19,17 +19,9 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          css = '''/* AI_OPPORTUNITY_VERTICAL_V1 */
-#ca #a6 .grid4{grid-template-columns:1fr!important;gap:10px;max-width:920px}
-#ca #a6 .box{min-height:auto;display:grid;grid-template-columns:150px 190px 1fr;align-items:center;gap:18px;padding:17px 20px}
-#ca #a6 .box em,#ca #a6 .box h3,#ca #a6 .box p{margin:0}
-#ca #a6 .box h3{font-size:18px;line-height:1.2}
-#ca #a6 .box p{font-size:12px;line-height:1.55}
-@media(max-width:720px){#ca #a6 .box{grid-template-columns:1fr;gap:9px}}
-'''
+          css = '/* AI_OPPORTUNITY_VERTICAL_V1 */#ca #a6 .grid4{grid-template-columns:1fr!important;gap:10px;max-width:920px}#ca #a6 .box{min-height:auto;display:grid;grid-template-columns:150px 190px 1fr;align-items:center;gap:18px;padding:17px 20px}#ca #a6 .box em,#ca #a6 .box h3,#ca #a6 .box p{margin:0}#ca #a6 .box h3{font-size:18px;line-height:1.2}#ca #a6 .box p{font-size:12px;line-height:1.55}@media(max-width:720px){#ca #a6 .box{grid-template-columns:1fr;gap:9px}}'
           if '/* AI_OPPORTUNITY_VERTICAL_V1 */' not in s:
               s = s.replace('</style>', css + '</style>', 1)
           p.write_text(s, encoding='utf-8')
