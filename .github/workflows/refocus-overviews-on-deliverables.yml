@@ -1,4 +1,4 @@
-name: Clarify social metrics and remove skills
+name: Add portfolio motion
 
 on:
   push:
@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Update portfolio content
+      - name: Add restrained page animations
         shell: bash
         run: |
           python - <<'PY'
@@ -23,20 +23,72 @@ jobs:
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
 
-          # Remove homepage skills band entirely.
-          skills = '<section class="sec s"><div class="band"><h2>技能</h2><p>SPSS · AI 工具使用</p></div></section>'
-          s = s.replace(skills, '', 1)
-
-          # Add concise context directly under the four social-media data cards.
-          marker = '<div class="box"><em>UNIQLO · INSTAGRAM</em><b>4.69M</b><span>触达 · +46.9%</span></div></div><div class="duo"><div class="box"><em>支持判断 01</em>'
-          replacement = '<div class="box"><em>UNIQLO · INSTAGRAM</em><b>4.69M</b><span>触达 · +46.9%</span></div></div><p class="data-context">项目期间持续观察社媒表现。互动率与触达会随内容发布、活动节奏与付费投放变化，因此以上数字反映的是当期表现，用于比较两种社媒模式，而不是长期固定值。</p><div class="duo"><div class="box"><em>支持判断 01</em>'
-          if marker not in s:
-              raise SystemExit('Social data block not found')
-          s = s.replace(marker, replacement, 1)
-
-          css = '/* SOCIAL_DATA_CONTEXT */#cf #f7 .data-context{margin:16px 2px 0;max-width:900px;font-size:13px;line-height:1.65;color:#5f615c}'
-          if '/* SOCIAL_DATA_CONTEXT */' not in s:
+          css = r'''/* PORTFOLIO_MOTION_V1 */
+          @keyframes heroRise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+          @keyframes caseEnter{from{opacity:0;transform:translateY(12px) scale(.996)}to{opacity:1;transform:none}}
+          @keyframes barEnter{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+          .hero .k{animation:heroRise .55s cubic-bezier(.2,.75,.25,1) .04s both}
+          .hero h1{animation:heroRise .72s cubic-bezier(.2,.75,.25,1) .12s both}
+          .hero .sub{animation:heroRise .66s cubic-bezier(.2,.75,.25,1) .22s both}
+          .motion-enabled .reveal{opacity:0;transform:translateY(22px);transition:opacity .62s cubic-bezier(.2,.75,.25,1),transform .62s cubic-bezier(.2,.75,.25,1);transition-delay:var(--reveal-delay,0ms);will-change:opacity,transform}
+          .motion-enabled .reveal.in{opacity:1;transform:none}
+          .motion-enabled .card.reveal{transform:translateY(24px) scale(.992)}
+          .motion-enabled .card.reveal.in{transform:translateY(0) scale(1)}
+          .card{transition:transform .28s cubic-bezier(.2,.75,.25,1),box-shadow .28s ease,border-color .28s ease}
+          .card:hover{transform:translateY(-6px);box-shadow:0 18px 42px rgba(17,17,17,.08)}
+          .box,.overview-row,.node,.logic-step{transition:transform .24s ease,border-color .24s ease,background-color .24s ease}
+          .box:hover,.overview-row:hover{transform:translateY(-2px);border-color:#bbb9b1}
+          .tags span,.meta span,.tabs a{transition:transform .2s ease,background-color .2s ease,color .2s ease,border-color .2s ease}
+          .tags span:hover,.meta span:hover,.tabs a:hover{transform:translateY(-1px);border-color:#a7a59d}
+          .tabs a:hover{background:#fff}
+          .case.on{animation:caseEnter .3s cubic-bezier(.2,.75,.25,1) both}
+          .case.on .bar{animation:barEnter .36s cubic-bezier(.2,.75,.25,1) both}
+          .case.on .ch{animation:heroRise .48s cubic-bezier(.2,.75,.25,1) .04s both}
+          .back{transition:transform .2s ease,background-color .2s ease}
+          .back:hover{transform:translateX(-3px);background:#292929}
+          .logo:before{transition:transform .25s ease}
+          .logo:hover:before{transform:scale(1.35)}
+          @media(prefers-reduced-motion:reduce){.hero .k,.hero h1,.hero .sub,.case.on,.case.on .bar,.case.on .ch{animation:none!important}.motion-enabled .reveal{opacity:1!important;transform:none!important;transition:none!important}.card,.box,.overview-row,.node,.logic-step,.tags span,.meta span,.tabs a,.back,.logo:before{transition:none!important}}
+          '''
+          if '/* PORTFOLIO_MOTION_V1 */' not in s:
               s = s.replace('</style>', css + '</style>', 1)
+
+          js = r'''<script id="portfolio-motion-v1">
+          (()=>{
+            if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            document.body.classList.add('motion-enabled');
+            const selectors=['#work .head','#work .card','.sec .head','.cap > div','.case .project-overview > *','.case .block .lay','.case .grid4 > .box','.case .grid3 > .box','.case .duo > .box','.case .logic-step','.case .opp-matrix .box','.case .path .node'];
+            const seen=new Set();
+            const items=[];
+            selectors.forEach(sel=>document.querySelectorAll(sel).forEach(el=>{if(!seen.has(el)){seen.add(el);items.push(el)}}));
+            items.forEach((el,i)=>{
+              el.classList.add('reveal');
+              const local=i%5;
+              el.style.setProperty('--reveal-delay',(local*55)+'ms');
+            });
+            const io=new IntersectionObserver(entries=>{
+              entries.forEach(entry=>{
+                if(entry.isIntersecting){entry.target.classList.add('in');io.unobserve(entry.target)}
+              });
+            },{threshold:.08,rootMargin:'0px 0px -7% 0px'});
+            items.forEach(el=>io.observe(el));
+            const originalOpen=window.openC;
+            if(typeof originalOpen==='function'){
+              window.openC=function(x){
+                originalOpen(x);
+                const panel=document.getElementById('c'+x);
+                requestAnimationFrame(()=>requestAnimationFrame(()=>{
+                  panel.querySelectorAll('.reveal').forEach(el=>{
+                    const r=el.getBoundingClientRect();
+                    if(r.top<window.innerHeight*.92 && r.bottom>0) el.classList.add('in');
+                  });
+                }));
+              };
+            }
+          })();
+          </script>'''
+          if 'id="portfolio-motion-v1"' not in s:
+              s = s.replace('</body>', js + '</body>', 1)
 
           p.write_text(s, encoding='utf-8')
           PY
@@ -47,5 +99,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Clarify social metric timing and remove skills section"
+          git commit -m "Add subtle page motion"
           git push
