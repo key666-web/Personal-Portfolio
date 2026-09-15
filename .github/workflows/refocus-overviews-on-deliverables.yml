@@ -1,4 +1,4 @@
-name: Fix opportunity matrix labels
+name: Clarify social metrics and remove skills
 
 on:
   push:
@@ -14,24 +14,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Make matrix labels upright and aligned
+      - name: Update portfolio content
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
+
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          css = '''/* AI_OPPORTUNITY_MATRIX_LABEL_FIX */
-          #ca #a6 .opp-matrix{grid-template-columns:92px 1fr 1fr!important}
-          #ca #a6 .opp-head{display:flex;align-items:center;justify-content:center}
-          #ca #a6 .opp-head:after{content:"任务价值 ↑";font-size:10px;font-weight:800;letter-spacing:.04em;color:var(--m);white-space:nowrap}
-          #ca #a6 .opp-row{writing-mode:horizontal-tb!important;transform:none!important;letter-spacing:0!important;white-space:nowrap;text-align:center;justify-content:center!important;align-items:center!important;font-size:11px!important}
-          #ca #a6 .opp-y{display:none!important}
-          #ca #a6 .opp-x{left:calc(92px + 50%)!important}
-          @media(max-width:720px){#ca #a6 .opp-matrix{grid-template-columns:66px 1fr 1fr!important}#ca #a6 .opp-row{font-size:10px!important}#ca #a6 .opp-head:after{font-size:9px}#ca #a6 .opp-x{left:calc(66px + 50%)!important}}
-          '''
-          if '/* AI_OPPORTUNITY_MATRIX_LABEL_FIX */' not in s:
+
+          # Remove homepage skills band entirely.
+          skills = '<section class="sec s"><div class="band"><h2>技能</h2><p>SPSS · AI 工具使用</p></div></section>'
+          s = s.replace(skills, '', 1)
+
+          # Add concise context directly under the four social-media data cards.
+          marker = '<div class="box"><em>UNIQLO · INSTAGRAM</em><b>4.69M</b><span>触达 · +46.9%</span></div></div><div class="duo"><div class="box"><em>支持判断 01</em>'
+          replacement = '<div class="box"><em>UNIQLO · INSTAGRAM</em><b>4.69M</b><span>触达 · +46.9%</span></div></div><p class="data-context">项目期间持续观察社媒表现。互动率与触达会随内容发布、活动节奏与付费投放变化，因此以上数字反映的是当期表现，用于比较两种社媒模式，而不是长期固定值。</p><div class="duo"><div class="box"><em>支持判断 01</em>'
+          if marker not in s:
+              raise SystemExit('Social data block not found')
+          s = s.replace(marker, replacement, 1)
+
+          css = '/* SOCIAL_DATA_CONTEXT */#cf #f7 .data-context{margin:16px 2px 0;max-width:900px;font-size:13px;line-height:1.65;color:#5f615c}'
+          if '/* SOCIAL_DATA_CONTEXT */' not in s:
               s = s.replace('</style>', css + '</style>', 1)
+
           p.write_text(s, encoding='utf-8')
           PY
       - name: Commit update
@@ -41,5 +47,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Fix AI opportunity matrix label orientation"
+          git commit -m "Clarify social metric timing and remove skills section"
           git push
