@@ -1,4 +1,4 @@
-name: Fix inline question typography
+name: Add H&M UNIQLO evidence section
 
 on:
   push:
@@ -14,16 +14,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Fix oversized inline labels inside cards
+      - name: Replace journey-only section with data findings and evidence
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          css = '/* INLINE_LABEL_FIX_V1 */.case .box p b{display:inline!important;font-size:inherit!important;line-height:inherit!important;letter-spacing:0!important;margin:0!important;font-weight:800!important;color:inherit!important}'
-          if '/* INLINE_LABEL_FIX_V1 */' not in s:
-              s = s.replace('</style>', css + '</style>', 1)
+
+          s = s.replace('<a href="#f7">06 消费者路径</a>', '<a href="#f7">06 数据发现</a>')
+
+          old = '''<div class="block" id="f7"><div class="s lay"><div class="lab">消费者路径</div><div class="ct"><h2>从“发内容”转向设计完整消费者路径。</h2><div class="path"><div class="node">发现<br/><small>TikTok</small></div><i>→</i><div class="node">考虑<br/><small>Instagram</small></div><i>→</i><div class="node">转化<br/><small>Website / App</small></div><i>→</i><div class="node">履约<br/><small>Store</small></div><i>→</i><div class="node">留存<br/><small>CRM / 会员</small></div></div></div></div></div>'''
+
+          new = '''<div class="block" id="f7"><div class="s lay"><div class="lab">数据发现</div><div class="ct"><h2>这些数据支持了我对两种社媒模式的判断。</h2><div class="grid4"><div class="box"><em>H&amp;M · TIKTOK</em><b>+69.63%</b><span>互动率变化</span></div><div class="box"><em>UNIQLO · TIKTOK</em><b>−56.15%</b><span>互动率变化</span></div><div class="box"><em>H&amp;M · INSTAGRAM</em><b>46.93M</b><span>触达 · +120.74%</span></div><div class="box"><em>UNIQLO · INSTAGRAM</em><b>4.69M</b><span>触达 · +46.9%</span></div></div><div class="duo"><div class="box"><em>支持判断 01</em><h3>H&amp;M 更擅长制造注意力与参与</h3><p>趋势内容、创作者、联名与 UGC 更强，短期激活能力更突出。</p></div><div class="box"><em>支持判断 02</em><h3>UNIQLO 更擅长降低购买摩擦</h3><p>LifeWear 表达更稳定，StyleHint 与产品、库存、到店自提的连接更清晰。</p></div></div><div class="src">数据说明：触达增长可能同时受到付费媒体影响，因此这里把 Reach 作为曝光证据，而不是直接等同于内容质量。</div></div></div></div>'''
+
+          if old not in s:
+              raise SystemExit('Target f7 block not found; no changes made')
+          s = s.replace(old, new)
           p.write_text(s, encoding='utf-8')
           PY
       - name: Commit update
@@ -33,5 +40,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Fix oversized key question labels"
+          git commit -m "Add H&M UNIQLO evidence and data findings"
           git push
