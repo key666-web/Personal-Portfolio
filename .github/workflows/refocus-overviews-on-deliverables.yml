@@ -1,4 +1,4 @@
-name: Rename portfolio heading
+name: Clean portfolio helper notes
 
 on:
   push:
@@ -14,18 +14,34 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Rename homepage section heading
+      - name: Remove small explanatory notes while keeping source citations
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
+
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          old = '<section class="sec s" id="work"><div class="head"><span>精选项目</span><h2>精选项目</h2></div>'
-          new = '<section class="sec s" id="work"><div class="head"><span>作品集</span><h2>作品集</h2></div>'
-          if old not in s:
-              raise SystemExit('Homepage selected-projects heading not found')
-          s = s.replace(old, new, 1)
+
+          # Remove small helper/disclaimer notes, but keep actual source citation rows with links.
+          pattern = re.compile(r'<div class="src">(.*?)</div>', re.S)
+          removed = 0
+          def clean(match):
+              nonlocal_removed = None
+              content = match.group(1)
+              if '<a href=' in content:
+                  return match.group(0)
+              return ''
+
+          before = s
+          s = pattern.sub(clean, s)
+
+          # Keep the extension section itself, but remove disclaimer-style wording.
+          s = s.replace('作品集延伸：以上两项为基于原课程比较分析进一步形成的策略建议，不作为原课程项目已完成的结论。','')
+
+          if s == before:
+              raise SystemExit('No removable helper notes found')
           p.write_text(s, encoding='utf-8')
           PY
       - name: Commit update
@@ -35,5 +51,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Rename homepage section to 作品集"
+          git commit -m "Clean small explanatory notes"
           git push
