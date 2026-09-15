@@ -1,4 +1,4 @@
-name: Use GODIVA analysis image stack
+name: Refine H&M case typography
 
 on:
   push:
@@ -14,47 +14,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Update GODIVA analysis stack
+      - name: Reduce H&M case title sizes
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
-          import re
 
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
 
-          css = r'''/* GODIVA_ANALYSIS_STACK_V2 */
-          #cg #g9 .ct{min-height:390px}
-          #cg #g9 .analysis-stack{position:relative;width:405px;height:340px;margin-top:22px;cursor:pointer}
-          #cg #g9 .analysis-img{position:absolute;left:0;top:0;width:250px;height:312px;border-radius:18px;overflow:hidden;border:1px solid #d7d5ce;background:#fff;box-shadow:0 12px 30px rgba(17,17,17,.10);transition:transform .22s ease}
-          #cg #g9 .analysis-img img{width:100%;height:100%;display:block;object-fit:cover;object-position:top center}
-          #cg #g9 .analysis-img.back{transform:translate(24px,14px);opacity:.74}
-          #cg #g9 .analysis-img.front{z-index:2}
-          #cg #g9 .analysis-stack:hover .analysis-img.front{transform:translateY(-3px)}
-          #cg #g9 .stack-count{position:absolute;left:292px;top:118px;z-index:4;background:#222;color:#c9c9c9;border-radius:999px;padding:12px 17px;font-size:16px;white-space:nowrap}
-          #cg #g9 .stack-count strong{color:#fff;font-size:24px;margin-left:5px}
-          .analysis-lightbox{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.72);padding:26px;overflow:auto}
-          .analysis-lightbox.on{display:block}
-          .analysis-panel{width:min(1120px,100%);margin:0 auto;background:#f3f1ea;border-radius:24px;padding:22px}
-          .analysis-panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
-          .analysis-panel-head h3{margin:0;font-size:24px;letter-spacing:-.03em}
-          .analysis-panel-head button{border:0;background:#111;color:#fff;border-radius:999px;padding:9px 14px;cursor:pointer}
-          .analysis-image-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-          .analysis-image-grid figure{margin:0}
-          .analysis-image-grid img{width:100%;height:auto;display:block;border-radius:16px;border:1px solid #d7d5ce;background:#fff}
-          .analysis-image-grid figcaption{margin-top:8px;font-size:12px;color:#6e7069}
-          @media(max-width:760px){#cg #g9 .analysis-stack{width:330px;height:310px}#cg #g9 .analysis-img{width:220px;height:275px}#cg #g9 .stack-count{left:245px;top:103px;font-size:14px;padding:10px 14px}.analysis-image-grid{grid-template-columns:1fr}}
+          css = r'''/* HM_TYPOGRAPHY_V1 */
+          #cf .ch h1{font-size:clamp(46px,6vw,72px)!important;line-height:.98!important;letter-spacing:-.055em!important}
+          #cf .ct h2{font-size:clamp(26px,3vw,38px)!important;line-height:1.10!important;letter-spacing:-.035em!important;max-width:920px}
+          #cf .overview-row.result .overview-text strong{font-size:clamp(24px,2.6vw,32px)!important;line-height:1.18!important}
+          #cf .box h3{font-size:16px!important;line-height:1.28!important;letter-spacing:-.01em!important}
+          @media(max-width:720px){#cf .ch h1{font-size:clamp(40px,12vw,56px)!important}#cf .ct h2{font-size:clamp(24px,7vw,32px)!important}}
           '''
-
-          if '/* GODIVA_ANALYSIS_STACK_V2 */' not in s:
-              s = re.sub(r'/\* GODIVA_ANALYSIS_STACK_V1 \*/.*?</style>', css + '</style>', s, count=1, flags=re.S)
-
-          block = '''<div class="block" id="g9"><div class="s lay"><div class="lab">补充分析</div><div class="ct"><h2>PEST × SWOT</h2><div class="analysis-stack" onclick="openGodivaAnalysis()"><div class="analysis-img back"><img src="assets/godiva-swot.svg" alt="GODIVA UK SWOT 分析"/></div><div class="analysis-img front"><img src="assets/godiva-pest.svg" alt="GODIVA UK PEST 分析"/></div><div class="stack-count">展开 <strong>2</strong></div></div></div></div></div>'''
-          s = re.sub(r'<div class="block" id="g9">.*?</section><section class="case" id="cf">', block + '</section><section class="case" id="cf">', s, count=1, flags=re.S)
-
-          lightbox = '''<div class="analysis-lightbox" id="godivaAnalysisLightbox" onclick="godivaAnalysisBg(event)"><div class="analysis-panel"><div class="analysis-panel-head"><h3>GODIVA UK · 补充分析</h3><button onclick="closeGodivaAnalysis()">关闭</button></div><div class="analysis-image-grid"><figure><img src="assets/godiva-pest.svg" alt="PEST 分析大图"/><figcaption>PEST 分析</figcaption></figure><figure><img src="assets/godiva-swot.svg" alt="SWOT 分析大图"/><figcaption>SWOT 分析</figcaption></figure></div></div></div><script id="godiva-analysis-js">function openGodivaAnalysis(){document.getElementById('godivaAnalysisLightbox').classList.add('on');document.body.style.overflow='hidden'}function closeGodivaAnalysis(){document.getElementById('godivaAnalysisLightbox').classList.remove('on');document.body.style.overflow=''}function godivaAnalysisBg(e){if(e.target.id==='godivaAnalysisLightbox')closeGodivaAnalysis()}</script>'''
-          s = re.sub(r'<div class="analysis-lightbox" id="godivaAnalysisLightbox".*?<script id="godiva-analysis-js">.*?</script>', lightbox, s, count=1, flags=re.S)
+          if '/* HM_TYPOGRAPHY_V1 */' not in s:
+              s = s.replace('</style>', css + '</style>', 1)
 
           p.write_text(s, encoding='utf-8')
           PY
@@ -65,5 +42,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Use image stack for GODIVA analyses"
+          git commit -m "Reduce H&M case title sizes"
           git push
