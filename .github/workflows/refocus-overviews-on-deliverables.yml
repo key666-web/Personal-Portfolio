@@ -1,4 +1,4 @@
-name: Add GODIVA analysis stack
+name: Use GODIVA analysis image stack
 
 on:
   push:
@@ -14,63 +14,50 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Add GODIVA stacked analysis gallery
+      - name: Update GODIVA analysis stack
         shell: bash
         run: |
-          python - <<'PY2'
+          python - <<'PY'
           from pathlib import Path
+          import re
 
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
 
-          css = r'''/* GODIVA_ANALYSIS_STACK_V1 */
-          #cg #g9 .ct{min-height:440px}
-          #cg #g9 .analysis-stack{position:relative;width:370px;height:360px;margin-top:22px;cursor:pointer}
-          #cg #g9 .analysis-page{position:absolute;left:0;top:0;width:255px;height:332px;border-radius:16px;border:1px solid #d7d5ce;background:#fff;overflow:hidden;box-shadow:0 12px 30px rgba(17,17,17,.09);transition:transform .24s ease,opacity .24s ease;padding:17px;color:#111}
-          #cg #g9 .analysis-page.back{transform:translate(24px,14px);opacity:.68}
-          #cg #g9 .analysis-page.front{transform:translate(0,0);z-index:2}
-          #cg #g9 .analysis-stack:hover .analysis-page.front{transform:translateY(-4px)}
-          #cg #g9 .analysis-stack:hover .analysis-page.back{transform:translate(29px,17px)}
-          #cg #g9 .analysis-page .mini-k{font-size:8px;font-weight:900;letter-spacing:.09em;color:#3157ff;margin-bottom:7px}
-          #cg #g9 .analysis-page h3{font-size:19px;letter-spacing:-.04em;margin:0 0 12px}
-          #cg #g9 .mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
-          #cg #g9 .mini-cell{border:1px solid #e0ded7;border-radius:9px;background:#fbfaf6;padding:9px;min-height:108px}
-          #cg #g9 .mini-cell b{display:block;font-size:10px;color:#3157ff;margin-bottom:5px}
-          #cg #g9 .mini-cell p{font-size:8.4px;line-height:1.45;color:#5d5f59;margin:0}
-          #cg #g9 .stack-count{position:absolute;right:0;top:128px;background:#2b2b2bdd;color:#fff;border-radius:999px;padding:13px 17px;font-size:16px;line-height:1;z-index:5}
-          #cg #g9 .stack-count strong{font-size:21px;margin-left:5px}
-          .analysis-lightbox{display:none;position:fixed;inset:0;z-index:220;background:rgba(0,0,0,.72);padding:26px;overflow:auto}
+          css = r'''/* GODIVA_ANALYSIS_STACK_V2 */
+          #cg #g9 .ct{min-height:390px}
+          #cg #g9 .analysis-stack{position:relative;width:405px;height:340px;margin-top:22px;cursor:pointer}
+          #cg #g9 .analysis-img{position:absolute;left:0;top:0;width:250px;height:312px;border-radius:18px;overflow:hidden;border:1px solid #d7d5ce;background:#fff;box-shadow:0 12px 30px rgba(17,17,17,.10);transition:transform .22s ease}
+          #cg #g9 .analysis-img img{width:100%;height:100%;display:block;object-fit:cover;object-position:top center}
+          #cg #g9 .analysis-img.back{transform:translate(24px,14px);opacity:.74}
+          #cg #g9 .analysis-img.front{z-index:2}
+          #cg #g9 .analysis-stack:hover .analysis-img.front{transform:translateY(-3px)}
+          #cg #g9 .stack-count{position:absolute;left:292px;top:118px;z-index:4;background:#222;color:#c9c9c9;border-radius:999px;padding:12px 17px;font-size:16px;white-space:nowrap}
+          #cg #g9 .stack-count strong{color:#fff;font-size:24px;margin-left:5px}
+          .analysis-lightbox{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.72);padding:26px;overflow:auto}
           .analysis-lightbox.on{display:block}
-          .analysis-panel{width:min(1040px,100%);margin:auto;background:#f3f1ea;border-radius:22px;padding:20px;border:1px solid #d7d5ce}
-          .analysis-panel-head{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px}
-          .analysis-panel-head h3{margin:0;font-size:24px;letter-spacing:-.04em}
+          .analysis-panel{width:min(1120px,100%);margin:0 auto;background:#f3f1ea;border-radius:24px;padding:22px}
+          .analysis-panel-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
+          .analysis-panel-head h3{margin:0;font-size:24px;letter-spacing:-.03em}
           .analysis-panel-head button{border:0;background:#111;color:#fff;border-radius:999px;padding:9px 14px;cursor:pointer}
-          .analysis-full-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-          .analysis-full{background:#fff;border:1px solid #d7d5ce;border-radius:18px;padding:24px;min-height:620px}
-          .analysis-full .full-k{font-size:10px;font-weight:900;letter-spacing:.1em;color:#3157ff;margin-bottom:8px}
-          .analysis-full h4{font-size:34px;letter-spacing:-.05em;margin:0 0 20px}
-          .analysis-full .quad{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-          .analysis-full .q{background:#fbfaf6;border:1px solid #e0ded7;border-radius:13px;padding:14px;min-height:235px}
-          .analysis-full .q b{display:block;color:#3157ff;font-size:12px;margin-bottom:9px}
-          .analysis-full .q p{font-size:12px;line-height:1.65;color:#555;margin:0}
-          @media(max-width:760px){#cg #g9 .analysis-stack{width:320px;height:330px}#cg #g9 .analysis-page{width:225px;height:300px}.analysis-full-grid{grid-template-columns:1fr}.analysis-full{min-height:auto}.analysis-full .quad{grid-template-columns:1fr}}
+          .analysis-image-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+          .analysis-image-grid figure{margin:0}
+          .analysis-image-grid img{width:100%;height:auto;display:block;border-radius:16px;border:1px solid #d7d5ce;background:#fff}
+          .analysis-image-grid figcaption{margin-top:8px;font-size:12px;color:#6e7069}
+          @media(max-width:760px){#cg #g9 .analysis-stack{width:330px;height:310px}#cg #g9 .analysis-img{width:220px;height:275px}#cg #g9 .stack-count{left:245px;top:103px;font-size:14px;padding:10px 14px}.analysis-image-grid{grid-template-columns:1fr}}
           '''
-          if '/* GODIVA_ANALYSIS_STACK_V1 */' not in s:
-              s = s.replace('</style>', css + '</style>', 1)
 
-          block = r'''<div class="block" id="g9"><div class="s lay"><div class="lab">补充分析</div><div class="ct"><h2>PEST × SWOT</h2><div class="analysis-stack" onclick="openGodivaAnalysis()"><div class="analysis-page back"><div class="mini-k">SWOT ANALYSIS</div><h3>GODIVA UK</h3><div class="mini-grid"><div class="mini-cell"><b>S｜优势</b><p>全球高端品牌认知；稳定的产品品质与持续创新。</p></div><div class="mini-cell"><b>W｜劣势</b><p>英国客服与物流体验不稳；渠道存在感及本地化不足。</p></div><div class="mini-cell"><b>O｜机会</b><p>3D 打印、酒心产品与健康可持续趋势带来创新空间。</p></div><div class="mini-cell"><b>T｜威胁</b><p>通胀压缩高端消费；Lindt、Hotel Chocolat 本地优势更强。</p></div></div></div><div class="analysis-page front"><div class="mini-k">PEST ANALYSIS</div><h3>GODIVA UK</h3><div class="mini-grid"><div class="mini-cell"><b>P｜政策</b><p>塑料包装税与包装法规提高合规要求；可可供应存在地缘风险。</p></div><div class="mini-cell"><b>E｜经济</b><p>生活成本压力影响非必要消费；原料价格波动增加成本。</p></div><div class="mini-cell"><b>S｜社会</b><p>英国巧克力消费习惯稳定；高收入人群更关注体验与品牌故事。</p></div><div class="mini-cell"><b>T｜技术</b><p>AI、数据与 3D 打印支持产品创新和效率提升。</p></div></div></div><div class="stack-count">展开 <strong>2</strong></div></div></div></div></div>'''
-          if 'id="g9"' not in s:
-              marker = '</section><section class="case" id="cf">'
-              if marker not in s:
-                  raise SystemExit('GODIVA end marker not found')
-              s = s.replace(marker, block + '</section><section class="case" id="cf">', 1)
+          if '/* GODIVA_ANALYSIS_STACK_V2 */' not in s:
+              s = re.sub(r'/\* GODIVA_ANALYSIS_STACK_V1 \*/.*?</style>', css + '</style>', s, count=1, flags=re.S)
 
-          modal = r'''<div class="analysis-lightbox" id="godivaAnalysisLightbox" onclick="godivaAnalysisBg(event)"><div class="analysis-panel"><div class="analysis-panel-head"><h3>GODIVA UK · 补充分析</h3><button onclick="closeGodivaAnalysis()">关闭</button></div><div class="analysis-full-grid"><div class="analysis-full"><div class="full-k">PEST ANALYSIS</div><h4>英国高端巧克力市场宏观环境</h4><div class="quad"><div class="q"><b>P｜政策</b><p>英国塑料包装税提高包装合规与成本要求；欧盟 PPWR 推动更高的可持续包装标准；西非冲突与供应不稳定可能推高可可原料成本。</p></div><div class="q"><b>E｜经济</b><p>生活成本危机压缩消费者可支配收入和非必要消费；可可价格波动进一步增加品牌成本压力。</p></div><div class="q"><b>S｜社会</b><p>英国消费者保持较高巧克力消费习惯；巧克力兼具犒赏、礼赠与情绪慰藉属性，高收入群体更重视精致体验与品牌故事。</p></div><div class="q"><b>T｜技术</b><p>AI 与数据技术可支持产品与配方创新；3D 打印技术有助于提升造型创新、生产效率和差异化体验。</p></div></div></div><div class="analysis-full"><div class="full-k">SWOT ANALYSIS</div><h4>英国市场品牌诊断</h4><div class="quad"><div class="q"><b>S｜优势</b><p>全球知名的比利时高端巧克力品牌，具备奢华与品质认知；原料和工艺质量稳定；持续推出新口味和产品内容。</p></div><div class="q"><b>W｜劣势</b><p>英国客服与物流体验不稳定；零售存在感和渠道覆盖弱于主要竞品；营销本地化不足，与英国消费者文化连接不强。</p></div><div class="q"><b>O｜机会</b><p>3D 打印可支持更有辨识度的产品创新；酒心巧克力与沉浸式礼赠体验可丰富产品组合；健康与可持续趋势提供新品机会。</p></div><div class="q"><b>T｜威胁</b><p>经济不确定性与通胀可能压缩高端消费；品牌表达若与英国偏好不匹配会削弱亲和力；Lindt、Hotel Chocolat 的本地存在感更强。</p></div></div></div></div></div></div><script id="godiva-analysis-js">function openGodivaAnalysis(){document.getElementById('godivaAnalysisLightbox').classList.add('on');document.body.style.overflow='hidden'}function closeGodivaAnalysis(){document.getElementById('godivaAnalysisLightbox').classList.remove('on');document.body.style.overflow=''}function godivaAnalysisBg(e){if(e.target.id==='godivaAnalysisLightbox')closeGodivaAnalysis()}</script>'''
-          if 'id="godiva-analysis-js"' not in s:
-              s = s.replace('</body>', modal + '</body>', 1)
+          block = '''<div class="block" id="g9"><div class="s lay"><div class="lab">补充分析</div><div class="ct"><h2>PEST × SWOT</h2><div class="analysis-stack" onclick="openGodivaAnalysis()"><div class="analysis-img back"><img src="assets/godiva-swot.svg" alt="GODIVA UK SWOT 分析"/></div><div class="analysis-img front"><img src="assets/godiva-pest.svg" alt="GODIVA UK PEST 分析"/></div><div class="stack-count">展开 <strong>2</strong></div></div></div></div></div>'''
+          s = re.sub(r'<div class="block" id="g9">.*?</section><section class="case" id="cf">', block + '</section><section class="case" id="cf">', s, count=1, flags=re.S)
+
+          lightbox = '''<div class="analysis-lightbox" id="godivaAnalysisLightbox" onclick="godivaAnalysisBg(event)"><div class="analysis-panel"><div class="analysis-panel-head"><h3>GODIVA UK · 补充分析</h3><button onclick="closeGodivaAnalysis()">关闭</button></div><div class="analysis-image-grid"><figure><img src="assets/godiva-pest.svg" alt="PEST 分析大图"/><figcaption>PEST 分析</figcaption></figure><figure><img src="assets/godiva-swot.svg" alt="SWOT 分析大图"/><figcaption>SWOT 分析</figcaption></figure></div></div></div><script id="godiva-analysis-js">function openGodivaAnalysis(){document.getElementById('godivaAnalysisLightbox').classList.add('on');document.body.style.overflow='hidden'}function closeGodivaAnalysis(){document.getElementById('godivaAnalysisLightbox').classList.remove('on');document.body.style.overflow=''}function godivaAnalysisBg(e){if(e.target.id==='godivaAnalysisLightbox')closeGodivaAnalysis()}</script>'''
+          s = re.sub(r'<div class="analysis-lightbox" id="godivaAnalysisLightbox".*?<script id="godiva-analysis-js">.*?</script>', lightbox, s, count=1, flags=re.S)
 
           p.write_text(s, encoding='utf-8')
-          PY2
+          PY
       - name: Commit update
         shell: bash
         run: |
@@ -78,5 +65,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Add GODIVA analysis stack"
+          git commit -m "Use image stack for GODIVA analyses"
           git push
