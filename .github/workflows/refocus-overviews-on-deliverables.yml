@@ -1,4 +1,4 @@
-name: Add H&M UNIQLO evidence section
+name: Align H&M UNIQLO case with source
 
 on:
   push:
@@ -14,23 +14,46 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Replace journey-only section with data findings and evidence
+      - name: Reframe source findings and portfolio extension
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
+
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
 
-          s = s.replace('<a href="#f7">06 消费者路径</a>', '<a href="#f7">06 数据发现</a>')
+          # Homepage + case overview: keep original coursework claims separate from later portfolio extension.
+          s = s.replace('比较两种社媒逻辑，并形成平台角色与消费者旅程策略。','比较两种社媒逻辑、平台表现与消费者路径差异。')
+          s = s.replace('内容对比 · 数据分析 · 平台分工 · 路径优化','内容对比 · 数据分析 · 平台机制 · 消费者路径')
+          s = s.replace('<strong>完成 H&amp;M × UNIQLO 社媒优化方案</strong><span>发现 → 考虑 → 转化 → 履约 → 留存</span>','<strong>完成 H&amp;M × UNIQLO 社媒策略比较分析</strong><span>数据对比 · 平台表现 · O2O 路径 · 风险判断</span>')
 
-          old = '''<div class="block" id="f7"><div class="s lay"><div class="lab">消费者路径</div><div class="ct"><h2>从“发内容”转向设计完整消费者路径。</h2><div class="path"><div class="node">发现<br/><small>TikTok</small></div><i>→</i><div class="node">考虑<br/><small>Instagram</small></div><i>→</i><div class="node">转化<br/><small>Website / App</small></div><i>→</i><div class="node">履约<br/><small>Store</small></div><i>→</i><div class="node">留存<br/><small>CRM / 会员</small></div></div></div></div></div>'''
+          # Navigation labels.
+          s = s.replace('<a href="#f5">04 H&amp;M 优化</a>','<a href="#f5">04 H&amp;M｜表现与限制</a>')
+          s = s.replace('<a href="#f6">05 UNIQLO 优化</a>','<a href="#f6">05 UNIQLO｜优势与缺口</a>')
+          s = s.replace('<a href="#f7">06 数据发现</a>','<a href="#f7">06 数据发现</a><a href="#f8">07 策略延伸</a>')
 
-          new = '''<div class="block" id="f7"><div class="s lay"><div class="lab">数据发现</div><div class="ct"><h2>这些数据支持了我对两种社媒模式的判断。</h2><div class="grid4"><div class="box"><em>H&amp;M · TIKTOK</em><b>+69.63%</b><span>互动率变化</span></div><div class="box"><em>UNIQLO · TIKTOK</em><b>−56.15%</b><span>互动率变化</span></div><div class="box"><em>H&amp;M · INSTAGRAM</em><b>46.93M</b><span>触达 · +120.74%</span></div><div class="box"><em>UNIQLO · INSTAGRAM</em><b>4.69M</b><span>触达 · +46.9%</span></div></div><div class="duo"><div class="box"><em>支持判断 01</em><h3>H&amp;M 更擅长制造注意力与参与</h3><p>趋势内容、创作者、联名与 UGC 更强，短期激活能力更突出。</p></div><div class="box"><em>支持判断 02</em><h3>UNIQLO 更擅长降低购买摩擦</h3><p>LifeWear 表达更稳定，StyleHint 与产品、库存、到店自提的连接更清晰。</p></div></div><div class="src">数据说明：触达增长可能同时受到付费媒体影响，因此这里把 Reach 作为曝光证据，而不是直接等同于内容质量。</div></div></div></div>'''
+          # Replace H&M section with source-grounded findings rather than a claimed optimization plan.
+          f5 = '''<div class="block" id="f5"><div class="s lay"><div class="lab">H&amp;M｜表现与限制</div><div class="ct"><h2>H&amp;M 的优势在激活与留存，但增长质量和持续性存在限制。</h2><div class="grid3"><div class="box"><em>平台表现</em><h3>TikTok 更适配平台机制</h3><p>明星 / 联名与共创内容带来更强短期激活，TikTok 互动率同期增长 +69.63%。</p></div><div class="box"><em>自有渠道</em><h3>站内留存更强</h3><p>网站 Pages/Visit 6.41、平均访问 7分41秒，均高于 UNIQLO。</p></div><div class="box"><em>限制</em><h3>增长未必可持续</h3><p>评论互动偏浅，且曝光增长可能受到高成本合作与付费媒体推动；产品级 O2O 闭环也弱于 UNIQLO。</p></div></div></div></div></div>'''
+          s, n5 = re.subn(r'<div class="block" id="f5">.*?(?=<div class="block" id="f6">)', f5, s, count=1, flags=re.S)
+          if n5 != 1:
+              raise SystemExit('f5 block not found')
 
-          if old not in s:
-              raise SystemExit('Target f7 block not found; no changes made')
-          s = s.replace(old, new)
+          # Replace UNIQLO section with strengths and gaps actually supported by the coursework.
+          f6 = '''<div class="block" id="f6"><div class="s lay"><div class="lab">UNIQLO｜优势与缺口</div><div class="ct"><h2>UNIQLO 的路径更完整，但 TikTok 内容适配和内容深度仍有缺口。</h2><div class="grid3"><div class="box"><em>优势</em><h3>低摩擦 O2O 路径</h3><p>社媒内容可连接产品页、库存查询与 Click &amp; Collect，降低搜索与转化摩擦。</p></div><div class="box"><em>优势</em><h3>LifeWear 保持品牌一致性</h3><p>长期围绕功能价值与生活场景建立稳定的实用型品牌形象。</p></div><div class="box"><em>缺口</em><h3>TikTok 平台适配偏弱</h3><p>内容更像产品展示与功能指导，同期 TikTok 互动率下降 −56.15%，教育价值与参与感也仍可加强。</p></div></div></div></div></div>'''
+          s, n6 = re.subn(r'<div class="block" id="f6">.*?(?=<div class="block" id="f7">)', f6, s, count=1, flags=re.S)
+          if n6 != 1:
+              raise SystemExit('f6 block not found')
+
+          # Add a clearly labelled portfolio extension after the evidence section.
+          f8 = '''<div class="block" id="f8"><div class="s lay"><div class="lab">作品集延伸</div><div class="ct"><h2>基于原分析，再进一步转化为策略建议。</h2><div class="duo"><div class="box"><em>H&amp;M</em><h3>补齐转化闭环，降低增长依赖</h3><p>补强产品级 O2O 路径，并减少对高成本 campaign / paid media 的持续依赖。</p></div><div class="box"><em>UNIQLO</em><h3>保留功能价值，增强平台适配</h3><p>保留 LifeWear 与低摩擦购买路径，同时增加更符合 TikTok 的情境化、教育型与参与型内容。</p></div></div><div class="src">作品集延伸：以上两项为基于原课程比较分析进一步形成的策略建议，不作为原课程项目已完成的结论。</div></div></div></div>'''
+          if 'id="f8"' not in s:
+              marker = '</section><section class="case" id="cr">'
+              if marker not in s:
+                  raise SystemExit('Research case boundary not found')
+              s = s.replace(marker, f8 + '</section><section class="case" id="cr">', 1)
+
           p.write_text(s, encoding='utf-8')
           PY
       - name: Commit update
@@ -40,5 +63,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Add H&M UNIQLO evidence and data findings"
+          git commit -m "Align H&M UNIQLO case with original coursework"
           git push
