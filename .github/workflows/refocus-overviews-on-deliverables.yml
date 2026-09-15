@@ -1,4 +1,4 @@
-name: Improve case visual hierarchy
+name: Deduplicate AI growth hypothesis
 
 on:
   push:
@@ -14,58 +14,39 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Strengthen visual hierarchy without adding decorative images
+      - name: Remove repeated AI copy
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
-          import re
-          import textwrap
 
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          s = re.sub(r'(<div class="lab">)\d{2}\s*/\s*', r'\1', s)
 
-          css = textwrap.dedent('''
-          /* VISUAL_HIERARCHY_V2 */
-          .case{counter-reset:case-step}
-          .case .block{counter-increment:case-step;padding:72px 0}
-          .case .lay{grid-template-columns:126px 1fr;gap:46px;position:relative}
-          .case .lab{position:relative;padding-top:48px;font-size:11px;font-weight:800;letter-spacing:.08em;color:#3f413d;line-height:1.35}
-          .case .lab:before{content:counter(case-step,decimal-leading-zero);position:absolute;left:0;top:0;font-size:34px;line-height:1;font-weight:900;letter-spacing:-.05em;color:var(--u)}
-          .case .lab:after{content:"";position:absolute;left:0;top:38px;width:34px;height:2px;background:var(--u)}
-          .case .ct h2{font-size:clamp(32px,4.2vw,52px);line-height:1.02;max-width:900px;margin-bottom:22px}
-          .case .ct>p{font-size:14px;line-height:1.7;max-width:720px;color:#62645f}
-          .case .grid4,.case .grid3{gap:12px;margin-top:24px}
-          .case .box{min-height:132px;padding:20px;background:#fbfaf6;border-color:#d5d3cb;display:flex;flex-direction:column;justify-content:flex-start}
-          .case .box b{font-size:clamp(34px,4vw,48px);line-height:.98;margin-bottom:12px}
-          .case .box h3{font-size:18px;line-height:1.2;margin:10px 0 8px}
-          .case .box p,.case .box span{font-size:11.5px;line-height:1.55}
-          .case .box em{display:inline-flex;width:max-content;max-width:100%;padding:5px 7px;border-radius:7px;background:#e9eeff;color:var(--u);font-size:9px;letter-spacing:.08em}
-          .case .path{margin-top:24px;padding:18px;border:1px solid var(--l);border-radius:18px;background:#fbfaf6}
-          .case .node{background:#fff;border:1px solid #d8d6cf;padding:13px 15px}
-          .case .path i{font-size:17px;font-weight:900;color:var(--u)}
-          .case .logic-flow{border-top:0;margin-top:24px}
-          .case .logic-step{grid-template-columns:118px 1fr;gap:20px;padding:22px 24px;margin-bottom:10px;border:1px solid var(--l);border-radius:16px;background:#fbfaf6}
-          .case .logic-step+.logic-step{border-top:1px solid var(--l)}
-          .case .logic-label{padding-top:3px}
-          .case .logic-arrow{display:none}
-          .case .core-conclusion{background:#151515;color:#fff;border-top:0;padding:64px 0}
-          .case .core-conclusion .lab{color:#d0d0d0}
-          .case .core-conclusion .lab:before{color:#8093ff}
-          .case .core-conclusion .lab:after{background:#8093ff}
-          .case .core-conclusion .ct h2{color:#fff;font-size:clamp(38px,5vw,64px);max-width:980px;margin:0}
-          .case .project-overview{gap:12px;margin-top:34px}
-          .case .overview-row{padding:18px 20px;border-radius:16px}
-          .case .overview-row.result{padding:26px 28px}
-          .case .overview-row.result .overview-text strong{font-size:clamp(28px,3.4vw,40px)}
-          .case .tabs{padding-top:10px;padding-bottom:10px}
-          .case .tabs a{transition:.18s;border-color:#d2d0c9;background:#f8f7f2}
-          .case .tabs a:hover{border-color:var(--u);color:var(--u)}
-          @media(max-width:720px){.case .block{padding:54px 0}.case .lay{grid-template-columns:1fr;gap:18px}.case .lab{padding-top:42px}.case .lab:before{font-size:30px}.case .ct h2{font-size:clamp(30px,9vw,44px)}.case .logic-step{grid-template-columns:1fr;gap:8px;padding:18px}.case .grid4,.case .grid3{gap:9px}.case .box{min-height:auto}}
-          ''')
+          s = s.replace('专业工作流 · 潜在需求 · 个性化互动娱乐','任务分群 · 竞争格局 · 机会矩阵')
+          s = s.replace('下一轮消费级 AI 增量，可能来自“个性化互动娱乐”。','从已验证的付费场景，继续寻找下一类增量需求。')
 
-          if '/* VISUAL_HIERARCHY_V2 */' not in s:
+          old1 = '<div class="logic-step"><div class="logic-label">01 / 现在的事实</div><div class="logic-body"><h3>生产力 AI 已经表现出更明确的付费逻辑。</h3><p>在 Coding、数据分析、设计和复杂办公等场景中，AI 能直接节省时间并改善任务结果，因此用户更容易理解为什么需要付费。</p></div></div>'
+          new1 = '<div class="logic-step"><div class="logic-label">01 / 已验证场景</div><div class="logic-body"><h3>生产力 AI 已经形成更清晰的付费理由。</h3><div class="logic-tags"><span>Coding</span><span>数据分析</span><span>设计</span><span>复杂办公</span></div></div></div>'
+          s = s.replace(old1, new1)
+
+          old2 = '<div class="logic-step"><div class="logic-label">02 / 早期市场信号</div><div class="logic-body"><h3>互动型 AI 已经开始出现真实收入增长。</h3><p>Sensor Tower 显示，AI Companion 在 2026 Q1 收入约 1.5 亿美元，较 2023 Q1 扩大超过 12 倍。</p><div class="logic-evidence">这说明持续互动型 AI 已经出现付费行为，但不能据此判断消费者会普遍为“AI 情感陪伴”本身付费。</div><div class="src">Source: <a href="https://sensortower.com/blog/state-of-ai-apps-in-apac-2026-report" target="_blank" rel="noopener">Sensor Tower, State of AI Apps 2026: APAC Edition</a>.</div></div></div>'
+          new2 = '<div class="logic-step"><div class="logic-label">02 / 市场信号</div><div class="logic-body"><h3>互动型 AI 已经出现收入增长。</h3><p><b>约 1.5 亿美元</b> · 2026 Q1 AI Companion 收入 · 较 2023 Q1 超过 12×</p><div class="logic-evidence">收入增长 ≠ 用户会普遍为“情感陪伴”付费</div><div class="src">Source: <a href="https://sensortower.com/blog/state-of-ai-apps-in-apac-2026-report" target="_blank" rel="noopener">Sensor Tower, State of AI Apps 2026: APAC Edition</a>.</div></div></div>'
+          s = s.replace(old2, new2)
+
+          old3 = '<div class="logic-step logic-hyp"><div class="logic-label">03 / 我的预测</div><div class="logic-body"><h3>下一轮机会未必是“AI 陪伴”，而可能是 AI 驱动的个性化互动娱乐。</h3><p>用户购买的不是单纯聊天或情感陪伴，而是传统内容产品难以提供的持续变化的个人化体验，例如剧情根据用户选择发展、角色记住过去的互动，以及内容根据个人历史持续生成。</p></div></div>'
+          new3 = '<div class="logic-step logic-hyp"><div class="logic-label">03 / 我的预测</div><div class="logic-body"><h3>下一轮机会未必是“AI 陪伴”，而可能是 AI 驱动的个性化互动娱乐。</h3><div class="logic-tags"><span>剧情随选择变化</span><span>角色保留互动记忆</span><span>内容持续个性化生成</span></div></div></div>'
+          s = s.replace(old3, new3)
+
+          old4 = '<div class="logic-step"><div class="logic-label">04 / 为什么可能成立</div><div class="logic-body"><h3>AI 正在改变个性化内容的成本结构。</h3><p>传统娱乐中，个性化程度越高，通常意味着投入更多创作资源，因此很难同时实现一对一体验和大规模生产。生成式 AI 则可能让同一套内容系统根据不同用户持续生成不同体验。</p></div></div>'
+          new4 = '<div class="logic-step"><div class="logic-label">04 / 成立条件</div><div class="logic-body"><h3>生成式 AI 可能降低一对一个性化内容的边际制作成本。</h3></div></div>'
+          s = s.replace(old4, new4)
+
+          implication = '<div class="logic-implication"><b>市场可能从“所有人消费同一套内容”，逐渐出现“每个人拥有不同版本的内容”。</b><span>这是基于当前市场信号和生成式内容能力提出的前瞻性判断，而不是确定性结论。</span></div>'
+          s = s.replace(implication, '')
+
+          css = '.logic-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.logic-tags span{display:inline-flex;padding:7px 10px;border:1px solid var(--l);border-radius:999px;background:#fff;font-size:11px;color:#555}.logic-hyp .logic-tags span{background:#f7f7f4;color:#333}'
+          if '.logic-tags{' not in s:
               s = s.replace('</style>', css + '</style>', 1)
 
           p.write_text(s, encoding='utf-8')
@@ -77,5 +58,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Improve case visual hierarchy and scanning"
+          git commit -m "Deduplicate AI growth hypothesis copy"
           git push
