@@ -1,4 +1,4 @@
-name: Stack AI opportunity matrix vertically
+name: Restore AI opportunity matrix
 
 on:
   push:
@@ -14,15 +14,36 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Stack opportunity cards vertically
+      - name: Build true 2x2 opportunity matrix
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          css = '/* AI_OPPORTUNITY_VERTICAL_V1 */#ca #a6 .grid4{grid-template-columns:1fr!important;gap:10px;max-width:920px}#ca #a6 .box{min-height:auto;display:grid;grid-template-columns:150px 190px 1fr;align-items:center;gap:18px;padding:17px 20px}#ca #a6 .box em,#ca #a6 .box h3,#ca #a6 .box p{margin:0}#ca #a6 .box h3{font-size:18px;line-height:1.2}#ca #a6 .box p{font-size:12px;line-height:1.55}@media(max-width:720px){#ca #a6 .box{grid-template-columns:1fr;gap:9px}}'
-          if '/* AI_OPPORTUNITY_VERTICAL_V1 */' not in s:
+
+          old_css = '/* AI_OPPORTUNITY_VERTICAL_V1 */#ca #a6 .grid4{grid-template-columns:1fr!important;gap:10px;max-width:920px}#ca #a6 .box{min-height:auto;display:grid;grid-template-columns:150px 190px 1fr;align-items:center;gap:18px;padding:17px 20px}#ca #a6 .box em,#ca #a6 .box h3,#ca #a6 .box p{margin:0}#ca #a6 .box h3{font-size:18px;line-height:1.2}#ca #a6 .box p{font-size:12px;line-height:1.55}@media(max-width:720px){#ca #a6 .box{grid-template-columns:1fr;gap:9px}}'
+          s = s.replace(old_css, '')
+
+          old = '<div class="grid4"><div class="box"><em>高价值 × 低频</em><h3>阶段性任务</h3><p>求职、申请、考试、重要项目。更适合短周期付费。</p></div><div class="box dark"><em>高价值 × 高频</em><h3>专业工作流</h3><p>优先机会：Coding、数据、设计、复杂办公。订阅价值更清晰。</p></div><div class="box"><em>低价值 × 高频</em><h3>日常效率</h3><p>使用多，但免费替代强。</p></div><div class="box"><em>低价值 × 低频</em><h3>临时需求</h3><p>付费理由最弱。</p></div></div>'
+          new = '<div class="opp-matrix"><div class="opp-head"></div><div class="opp-col">低频</div><div class="opp-col">高频</div><div class="opp-row">高价值</div><div class="box"><h3>阶段性任务</h3><p>求职、申请、考试、重要项目。更适合短周期付费。</p></div><div class="box dark"><h3>专业工作流</h3><p>Coding、数据、设计、复杂办公。订阅价值更清晰。</p></div><div class="opp-row">低价值</div><div class="box"><h3>临时需求</h3><p>付费理由最弱。</p></div><div class="box"><h3>日常效率</h3><p>使用多，但免费替代强。</p></div><div class="opp-y">任务价值 ↑</div><div class="opp-x">使用频率 →</div></div>'
+          if old not in s:
+              raise SystemExit('AI opportunity card block not found')
+          s = s.replace(old, new, 1)
+
+          css = '''/* AI_OPPORTUNITY_MATRIX_V2 */
+          #ca #a6 .opp-matrix{position:relative;display:grid;grid-template-columns:74px 1fr 1fr;grid-template-rows:auto 1fr 1fr;gap:10px;margin-top:24px;padding:0 0 38px 0;max-width:920px}
+          #ca #a6 .opp-head{grid-column:1;grid-row:1}
+          #ca #a6 .opp-col{font-size:11px;font-weight:800;color:var(--u);text-align:center;padding:2px 0 4px}
+          #ca #a6 .opp-row{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:var(--u);writing-mode:vertical-rl;transform:rotate(180deg);letter-spacing:.08em}
+          #ca #a6 .opp-matrix .box{min-height:150px;display:flex!important;flex-direction:column!important;justify-content:center!important;padding:22px!important}
+          #ca #a6 .opp-matrix .box h3{font-size:20px!important;line-height:1.2;margin:0 0 10px!important}
+          #ca #a6 .opp-matrix .box p{font-size:12px!important;line-height:1.6;margin:0!important}
+          #ca #a6 .opp-y{position:absolute;left:-4px;top:50%;transform:translate(-100%,-50%) rotate(-90deg);transform-origin:center;font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--m);white-space:nowrap}
+          #ca #a6 .opp-x{position:absolute;left:calc(74px + 50%);bottom:2px;transform:translateX(-50%);font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--m);white-space:nowrap}
+          @media(max-width:720px){#ca #a6 .opp-matrix{grid-template-columns:46px 1fr 1fr;gap:7px;padding-bottom:34px}#ca #a6 .opp-matrix .box{min-height:132px;padding:14px!important}#ca #a6 .opp-matrix .box h3{font-size:16px!important}#ca #a6 .opp-matrix .box p{font-size:10.5px!important}#ca #a6 .opp-x{left:calc(46px + 50%)}}
+          '''
+          if '/* AI_OPPORTUNITY_MATRIX_V2 */' not in s:
               s = s.replace('</style>', css + '</style>', 1)
           p.write_text(s, encoding='utf-8')
           PY
@@ -33,5 +54,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Stack AI opportunity matrix vertically"
+          git commit -m "Restore AI opportunity as 2x2 matrix"
           git push
