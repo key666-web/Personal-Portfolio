@@ -1,4 +1,4 @@
-name: Add GODIVA campaign visual preview
+name: Reduce repeated portfolio text
 
 on:
   push:
@@ -14,32 +14,54 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Add GODIVA campaign visual
+      - name: Simplify case copy
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
 
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
 
-          css = '''.campaign-preview{margin:18px auto 32px;width:min(1120px,calc(100% - 36px));border-radius:24px;overflow:hidden;background:#241710;color:#f4ead9;min-height:420px;position:relative;border:1px solid #3b2a20}.campaign-preview:before{content:"";position:absolute;width:340px;height:340px;border:1px solid #7f674f;border-radius:50%;right:-70px;top:-80px;opacity:.45}.campaign-preview:after{content:"";position:absolute;width:210px;height:210px;border:1px solid #7f674f;border-radius:50%;right:95px;bottom:-115px;opacity:.28}.campaign-inner{position:relative;z-index:2;padding:48px;min-height:420px;display:flex;flex-direction:column;justify-content:space-between}.campaign-kicker{font-size:10px;letter-spacing:.16em;font-weight:800;color:#d8bc91}.campaign-title{font-family:Georgia,"Times New Roman",serif;font-size:clamp(58px,8vw,112px);line-height:.78;letter-spacing:-.055em;margin:18px 0 12px}.campaign-title span{display:block;margin-left:15%;font-style:italic;font-weight:400}.campaign-sub{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#d8bc91}.campaign-bottom{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-top:36px}.campaign-tags{display:flex;gap:8px;flex-wrap:wrap}.campaign-tags b{border:1px solid #8c745b;border-radius:99px;padding:8px 11px;font-size:10px;letter-spacing:.05em}.campaign-objects{display:flex;align-items:end;gap:18px}.tea-cup{width:96px;height:60px;border:2px solid #d8bc91;border-radius:0 0 48px 48px;position:relative}.tea-cup:after{content:"";position:absolute;width:26px;height:30px;border:2px solid #d8bc91;border-left:0;border-radius:0 18px 18px 0;right:-27px;top:8px}.choc-box{width:118px;height:82px;border:2px solid #d8bc91;transform:rotate(-6deg);display:grid;place-items:center;font-family:Georgia,"Times New Roman",serif;font-size:18px}.preview-note{margin:10px auto 0;width:min(1120px,calc(100% - 36px));font-size:10px;color:var(--m);letter-spacing:.05em}@media(max-width:720px){.campaign-inner{padding:28px;min-height:360px}.campaign-preview{min-height:360px}.campaign-bottom{align-items:flex-start;flex-direction:column}.campaign-objects{align-self:flex-end;transform:scale(.8);transform-origin:right bottom}}'''
-          if '.campaign-preview{' not in s:
-              s = s.replace('</style>', css + '</style>', 1)
+          # 1) Remove repeated conclusion/callout blocks. Section headings and evidence stay.
+          s = re.sub(r'<div class="ins(?: key)?">.*?</div>', '', s, flags=re.S)
+          s = re.sub(r'<div class="final">.*?</div>', '', s, flags=re.S)
 
-          marker_start = '<!-- GODIVA_VISUAL_START -->'
-          marker_end = '<!-- GODIVA_VISUAL_END -->'
-          if marker_start in s and marker_end in s:
-              a = s.index(marker_start)
-              b = s.index(marker_end, a) + len(marker_end)
-              s = s[:a] + s[b:]
+          # 2) When a section already has visual evidence/cards, remove the extra explanatory paragraph under the heading.
+          rich = r'(?:grid4|grid3|duo|path|logic-flow|campaign-preview|campaign-board)'
+          s = re.sub(
+              rf'(<div class="ct"><h2>.*?</h2>)<p>.*?</p>(?=<div class="{rich}")',
+              r'\1',
+              s,
+              flags=re.S
+          )
 
-          visual = '''<!-- GODIVA_VISUAL_START --><div class="campaign-preview" id="godiva-campaign-preview"><div class="campaign-inner"><div><div class="campaign-kicker">GODIVA UK · CAMPAIGN CONCEPT</div><div class="campaign-title">GODIVA<span>Tea Time</span></div><div class="campaign-sub">Belgian chocolate × British afternoon tea</div></div><div class="campaign-bottom"><div class="campaign-tags"><b>Premium Gifting</b><b>Tea Pairing</b><b>#GodivaTeaTime</b></div><div class="campaign-objects"><div class="tea-cup" aria-hidden="true"></div><div class="choc-box" aria-hidden="true">GODIVA</div></div></div></div></div><div class="preview-note">作品集视觉化示例 · Campaign concept preview</div><!-- GODIVA_VISUAL_END -->'''
+          # 3) Remove the redundant H&M closing section if it still exists; the journey already communicates the conclusion.
+          s = s.replace('<a href="#f8">08 策略结论</a>', '')
+          m = re.search(r'<div class="block" id="f8">', s)
+          if m:
+              start = m.start()
+              # find the next case section or end of current case
+              end_case = s.find('</section>', start)
+              if end_case != -1:
+                  s = s[:start] + s[end_case:]
 
-          sec = s.find('<section class="case" id="cg">')
-          tabs = s.find('<div class="tabs s">', sec)
-          if sec != -1 and tabs != -1:
-              s = s[:tabs] + visual + s[tabs:]
+          # 4) Remove the small preview disclaimer under GODIVA visual; the visual itself is enough.
+          s = re.sub(r'<div class="preview-note">.*?</div>', '', s, flags=re.S)
+
+          # 5) Shorten several repeated explanatory sentences that remain inside cards.
+          replacements = {
+            '品牌传统清晰，但与英国消费者熟悉的消费场景连接不足。':'品牌资产与英国消费场景连接不足。',
+            '现有低评分说明购买后的体验存在风险，但项目没有直接测量留存率。':'低评分提示复购风险。',
+            '用英国下午茶这一熟悉场景，把品牌传统转化为更容易理解和记住的本地价值。':'用英式下午茶建立本地相关性。',
+            '改善包装、配送、订单追踪、客服与补偿机制，让实际体验重新匹配高端定位。':'改善包装、配送、追踪与客服体验。',
+            '把 StyleHint 从穿搭工具进一步转化为“创作者示范 → 用户复刻 → 上传分享”的参与路径。':'StyleHint：创作者示范 → 用户复刻 → 上传分享。',
+            '在已有低摩擦购买路径上补强社群参与与情绪激活。':'在低摩擦购买路径上补强参与。',
+            '完整的社交商务系统不应停留在互动，而应继续连接购买、履约与长期关系。':'互动 → 购买 → 履约 → 留存。'
+          }
+          for a,b in replacements.items():
+              s = s.replace(a,b)
 
           p.write_text(s, encoding='utf-8')
           PY
@@ -50,5 +72,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Add GODIVA Tea Time campaign visual preview"
+          git commit -m "Reduce repeated conclusions and simplify case copy"
           git push
