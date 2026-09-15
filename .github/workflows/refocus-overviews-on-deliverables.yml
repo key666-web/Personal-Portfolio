@@ -1,4 +1,4 @@
-name: Add GODIVA evidence support
+name: Reposition GODIVA evidence
 
 on:
   push:
@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Add evidence support to GODIVA journey
+      - name: Move GODIVA evidence into standalone panel
         shell: bash
         run: |
           python - <<'PY'
@@ -23,22 +23,29 @@ jobs:
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
 
-          marker = '<div class="duo"><div class="box"><em>前端策略回应</em><h3>GODIVA TEA TIME</h3><p>用英式下午茶建立本地相关性。</p></div><div class="box"><em>后端策略回应</em><h3>修复购买体验</h3><p>改善包装、配送、追踪与客服体验。</p></div></div>'
-          evidence = '''<div class="evidence-strip"><div class="evidence-head">证据支持</div><div class="evidence-side"><span>前端</span><b>Search Index 7</b><b>≈42K 月访问</b><b>≈0.5% UK 市占率</b></div><div class="evidence-side"><span>后端</span><b>1.4–1.7★ 评分</b><b>配送</b><b>包装</b><b>客服</b></div></div>'''
-          if evidence not in s:
-              if marker not in s:
-                  raise SystemExit('GODIVA strategy response marker not found')
-              s = s.replace(marker, evidence + marker, 1)
+          old_evidence = '<div class="evidence-strip"><div class="evidence-head">证据支持</div><div class="evidence-side"><span>前端</span><b>Search Index 7</b><b>≈42K 月访问</b><b>≈0.5% UK 市占率</b></div><div class="evidence-side"><span>后端</span><b>1.4–1.7★ 评分</b><b>配送</b><b>包装</b><b>客服</b></div></div>'
+          s = s.replace(old_evidence, '', 1)
 
-          css = '''/* GODIVA_EVIDENCE_SUPPORT */
-          #cg #g6 .evidence-strip{display:grid;grid-template-columns:130px 1fr 1fr;gap:10px;margin:18px 0 14px;align-items:stretch}
-          #cg #g6 .evidence-head{display:flex;align-items:center;font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--u);padding:0 8px}
-          #cg #g6 .evidence-side{background:#ebe9e2;border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-          #cg #g6 .evidence-side span{font-size:10px;font-weight:800;color:var(--u);margin-right:2px}
-          #cg #g6 .evidence-side b{font-size:13px;line-height:1.2;padding:6px 8px;border-radius:8px;background:#fbfaf6;border:1px solid #d7d5ce}
-          @media(max-width:720px){#cg #g6 .evidence-strip{grid-template-columns:1fr}.evidence-head{padding-left:0!important}.evidence-side{align-items:flex-start!important}}
+          strategy = '<div class="duo"><div class="box"><em>前端策略回应</em><h3>GODIVA TEA TIME</h3><p>用英式下午茶建立本地相关性。</p></div><div class="box"><em>后端策略回应</em><h3>修复购买体验</h3><p>改善包装、配送、追踪与客服体验。</p></div></div>'
+
+          panel = '''<div class="evidence-panel"><div class="evidence-panel-title">证据支持</div><div class="evidence-panel-grid"><div class="evidence-group"><span>前端｜品牌可见度与本地相关性</span><div class="evidence-values"><strong>Search Index 7</strong><strong>≈42K 月访问</strong><strong>≈0.5% UK 市占率</strong></div></div><div class="evidence-group"><span>后端｜购买体验</span><div class="evidence-values"><strong>1.4–1.7★ 评分</strong><strong>配送</strong><strong>包装</strong><strong>客服</strong></div></div></div></div>'''
+
+          if panel not in s:
+              if strategy not in s:
+                  raise SystemExit('GODIVA strategy response block not found')
+              s = s.replace(strategy, strategy + panel, 1)
+
+          css = '''/* GODIVA_EVIDENCE_PANEL_V2 */
+          #cg #g6 .evidence-panel{margin-top:14px;background:#fbfaf6;border:1px solid var(--l);border-radius:18px;padding:22px 24px}
+          #cg #g6 .evidence-panel-title{font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--u);margin-bottom:16px}
+          #cg #g6 .evidence-panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+          #cg #g6 .evidence-group+ .evidence-group{border-left:1px solid var(--l);padding-left:22px}
+          #cg #g6 .evidence-group>span{display:block;font-size:13px;font-weight:800;color:var(--i);margin-bottom:12px}
+          #cg #g6 .evidence-values{display:flex;gap:8px;flex-wrap:wrap}
+          #cg #g6 .evidence-values strong{font-size:12px;line-height:1.2;padding:7px 9px;border-radius:8px;background:#ebe9e2;color:#353733;font-weight:700}
+          @media(max-width:720px){#cg #g6 .evidence-panel-grid{grid-template-columns:1fr;gap:16px}#cg #g6 .evidence-group+ .evidence-group{border-left:0;border-top:1px solid var(--l);padding-left:0;padding-top:16px}}
           '''
-          if '/* GODIVA_EVIDENCE_SUPPORT */' not in s:
+          if '/* GODIVA_EVIDENCE_PANEL_V2 */' not in s:
               s = s.replace('</style>', css + '</style>', 1)
 
           p.write_text(s, encoding='utf-8')
@@ -50,5 +57,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Add GODIVA evidence support"
+          git commit -m "Move GODIVA evidence into standalone panel"
           git push
