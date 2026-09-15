@@ -1,4 +1,4 @@
-name: Add portfolio motion
+name: Add GODIVA evidence support
 
 on:
   push:
@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Add restrained page animations
+      - name: Add evidence support to GODIVA journey
         shell: bash
         run: |
           python - <<'PY'
@@ -23,72 +23,23 @@ jobs:
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
 
-          css = r'''/* PORTFOLIO_MOTION_V1 */
-          @keyframes heroRise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
-          @keyframes caseEnter{from{opacity:0;transform:translateY(12px) scale(.996)}to{opacity:1;transform:none}}
-          @keyframes barEnter{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
-          .hero .k{animation:heroRise .55s cubic-bezier(.2,.75,.25,1) .04s both}
-          .hero h1{animation:heroRise .72s cubic-bezier(.2,.75,.25,1) .12s both}
-          .hero .sub{animation:heroRise .66s cubic-bezier(.2,.75,.25,1) .22s both}
-          .motion-enabled .reveal{opacity:0;transform:translateY(22px);transition:opacity .62s cubic-bezier(.2,.75,.25,1),transform .62s cubic-bezier(.2,.75,.25,1);transition-delay:var(--reveal-delay,0ms);will-change:opacity,transform}
-          .motion-enabled .reveal.in{opacity:1;transform:none}
-          .motion-enabled .card.reveal{transform:translateY(24px) scale(.992)}
-          .motion-enabled .card.reveal.in{transform:translateY(0) scale(1)}
-          .card{transition:transform .28s cubic-bezier(.2,.75,.25,1),box-shadow .28s ease,border-color .28s ease}
-          .card:hover{transform:translateY(-6px);box-shadow:0 18px 42px rgba(17,17,17,.08)}
-          .box,.overview-row,.node,.logic-step{transition:transform .24s ease,border-color .24s ease,background-color .24s ease}
-          .box:hover,.overview-row:hover{transform:translateY(-2px);border-color:#bbb9b1}
-          .tags span,.meta span,.tabs a{transition:transform .2s ease,background-color .2s ease,color .2s ease,border-color .2s ease}
-          .tags span:hover,.meta span:hover,.tabs a:hover{transform:translateY(-1px);border-color:#a7a59d}
-          .tabs a:hover{background:#fff}
-          .case.on{animation:caseEnter .3s cubic-bezier(.2,.75,.25,1) both}
-          .case.on .bar{animation:barEnter .36s cubic-bezier(.2,.75,.25,1) both}
-          .case.on .ch{animation:heroRise .48s cubic-bezier(.2,.75,.25,1) .04s both}
-          .back{transition:transform .2s ease,background-color .2s ease}
-          .back:hover{transform:translateX(-3px);background:#292929}
-          .logo:before{transition:transform .25s ease}
-          .logo:hover:before{transform:scale(1.35)}
-          @media(prefers-reduced-motion:reduce){.hero .k,.hero h1,.hero .sub,.case.on,.case.on .bar,.case.on .ch{animation:none!important}.motion-enabled .reveal{opacity:1!important;transform:none!important;transition:none!important}.card,.box,.overview-row,.node,.logic-step,.tags span,.meta span,.tabs a,.back,.logo:before{transition:none!important}}
-          '''
-          if '/* PORTFOLIO_MOTION_V1 */' not in s:
-              s = s.replace('</style>', css + '</style>', 1)
+          marker = '<div class="duo"><div class="box"><em>前端策略回应</em><h3>GODIVA TEA TIME</h3><p>用英式下午茶建立本地相关性。</p></div><div class="box"><em>后端策略回应</em><h3>修复购买体验</h3><p>改善包装、配送、追踪与客服体验。</p></div></div>'
+          evidence = '''<div class="evidence-strip"><div class="evidence-head">证据支持</div><div class="evidence-side"><span>前端</span><b>Search Index 7</b><b>≈42K 月访问</b><b>≈0.5% UK 市占率</b></div><div class="evidence-side"><span>后端</span><b>1.4–1.7★ 评分</b><b>配送</b><b>包装</b><b>客服</b></div></div>'''
+          if evidence not in s:
+              if marker not in s:
+                  raise SystemExit('GODIVA strategy response marker not found')
+              s = s.replace(marker, evidence + marker, 1)
 
-          js = r'''<script id="portfolio-motion-v1">
-          (()=>{
-            if(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-            document.body.classList.add('motion-enabled');
-            const selectors=['#work .head','#work .card','.sec .head','.cap > div','.case .project-overview > *','.case .block .lay','.case .grid4 > .box','.case .grid3 > .box','.case .duo > .box','.case .logic-step','.case .opp-matrix .box','.case .path .node'];
-            const seen=new Set();
-            const items=[];
-            selectors.forEach(sel=>document.querySelectorAll(sel).forEach(el=>{if(!seen.has(el)){seen.add(el);items.push(el)}}));
-            items.forEach((el,i)=>{
-              el.classList.add('reveal');
-              const local=i%5;
-              el.style.setProperty('--reveal-delay',(local*55)+'ms');
-            });
-            const io=new IntersectionObserver(entries=>{
-              entries.forEach(entry=>{
-                if(entry.isIntersecting){entry.target.classList.add('in');io.unobserve(entry.target)}
-              });
-            },{threshold:.08,rootMargin:'0px 0px -7% 0px'});
-            items.forEach(el=>io.observe(el));
-            const originalOpen=window.openC;
-            if(typeof originalOpen==='function'){
-              window.openC=function(x){
-                originalOpen(x);
-                const panel=document.getElementById('c'+x);
-                requestAnimationFrame(()=>requestAnimationFrame(()=>{
-                  panel.querySelectorAll('.reveal').forEach(el=>{
-                    const r=el.getBoundingClientRect();
-                    if(r.top<window.innerHeight*.92 && r.bottom>0) el.classList.add('in');
-                  });
-                }));
-              };
-            }
-          })();
-          </script>'''
-          if 'id="portfolio-motion-v1"' not in s:
-              s = s.replace('</body>', js + '</body>', 1)
+          css = '''/* GODIVA_EVIDENCE_SUPPORT */
+          #cg #g6 .evidence-strip{display:grid;grid-template-columns:130px 1fr 1fr;gap:10px;margin:18px 0 14px;align-items:stretch}
+          #cg #g6 .evidence-head{display:flex;align-items:center;font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--u);padding:0 8px}
+          #cg #g6 .evidence-side{background:#ebe9e2;border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+          #cg #g6 .evidence-side span{font-size:10px;font-weight:800;color:var(--u);margin-right:2px}
+          #cg #g6 .evidence-side b{font-size:13px;line-height:1.2;padding:6px 8px;border-radius:8px;background:#fbfaf6;border:1px solid #d7d5ce}
+          @media(max-width:720px){#cg #g6 .evidence-strip{grid-template-columns:1fr}.evidence-head{padding-left:0!important}.evidence-side{align-items:flex-start!important}}
+          '''
+          if '/* GODIVA_EVIDENCE_SUPPORT */' not in s:
+              s = s.replace('</style>', css + '</style>', 1)
 
           p.write_text(s, encoding='utf-8')
           PY
@@ -99,5 +50,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Add subtle page motion"
+          git commit -m "Add GODIVA evidence support"
           git push
