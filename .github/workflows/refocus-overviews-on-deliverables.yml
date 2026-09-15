@@ -1,4 +1,4 @@
-name: Tighten portfolio sections
+name: Remove GODIVA campaign visual
 
 on:
   push:
@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Make each section carry one new point
+      - name: Remove GODIVA campaign visual block
         shell: bash
         run: |
           python - <<'PY'
@@ -24,132 +24,16 @@ jobs:
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
 
-          def div_range(text, start):
-              depth = 0
-              for m in re.finditer(r'<div\b[^>]*>|</div>', text[start:], flags=re.I):
-                  token = m.group(0)
-                  if token.startswith('<div'):
-                      depth += 1
-                  else:
-                      depth -= 1
-                      if depth == 0:
-                          return start, start + m.end()
-              return None
-
-          def remove_block(text, block_id):
-              marker = f'<div class="block" id="{block_id}">'
-              start = text.find(marker)
-              if start == -1:
-                  return text
-              rng = div_range(text, start)
-              if not rng:
-                  return text
-              a,b = rng
-              return text[:a] + text[b:]
-
-          def replace_block(text, block_id, new_html):
-              marker = f'<div class="block" id="{block_id}">'
-              start = text.find(marker)
-              if start == -1:
-                  return text
-              rng = div_range(text, start)
-              if not rng:
-                  return text
-              a,b = rng
-              return text[:a] + new_html + text[b:]
-
-          def set_label(text, block_id, label):
-              marker = f'<div class="block" id="{block_id}">'
-              start = text.find(marker)
-              if start == -1:
-                  return text
-              rng = div_range(text, start)
-              if not rng:
-                  return text
-              a,b = rng
-              block = text[a:b]
-              block = re.sub(r'<div class="lab">.*?</div>', f'<div class="lab">{label}</div>', block, count=1, flags=re.S)
-              return text[:a] + block + text[b:]
-
-          def set_tabs(text, case_id, entries):
-              sec = text.find(f'<section class="case" id="{case_id}">')
-              if sec == -1:
-                  return text
-              start = text.find('<div class="tabs s">', sec)
-              if start == -1:
-                  return text
-              end = text.find('</div>', start)
-              if end == -1:
-                  return text
-              end += len('</div>')
-              links = ''.join(f'<a href="#{i}">{label}</a>' for i,label in entries)
-              return text[:start] + f'<div class="tabs s">{links}</div>' + text[end:]
-
-          # Remove sections that only restate the project overview or repeat a conclusion already made elsewhere.
-          for bid in ['a1','g1','g5','g7','f1','f8','r1']:
-              s = remove_block(s, bid)
-
-          # Keep exactly one explicit core conclusion in the two strategy cases.
-          s = replace_block(
-              s,
-              'g3',
-              '<div class="block core-conclusion" id="g3"><div class="s lay"><div class="lab">02 / 核心结论</div><div class="ct"><h2>前端相关性弱，后端体验不稳。</h2></div></div></div>'
-          )
-          s = replace_block(
-              s,
-              'f3',
-              '<div class="block core-conclusion" id="f3"><div class="s lay"><div class="lab">02 / 核心结论</div><div class="ct"><h2>H&amp;M 强在注意力，UNIQLO 强在降低购买摩擦，但两者的消费者路径都不完整。</h2></div></div></div>'
-          )
-
-          # Strip remaining duplicated callouts/summaries. Evidence, cards, matrices and paths stay.
-          s = re.sub(r'<div class="ins(?: key)?">.*?</div>', '', s, flags=re.S)
-          s = re.sub(r'<div class="final">.*?</div>', '', s, flags=re.S)
-          s = re.sub(r'<div class="preview-note">.*?</div>', '', s, flags=re.S)
-
-          # If visual/cards already carry the information, remove the extra explanatory sentence directly under the heading.
-          rich = r'(?:grid4|grid3|duo|path|logic-flow|campaign-preview|campaign-board)'
+          # Remove the GODIVA campaign visual that appears between the case header and tabs.
           s = re.sub(
-              rf'(<div class="ct"><h2>.*?</h2>)<p>.*?</p>(?=<div class="{rich}")',
-              r'\1',
+              r'<!-- GODIVA_VISUAL_START -->.*?<!-- GODIVA_VISUAL_END -->',
+              '',
               s,
               flags=re.S
           )
 
-          # One-sentence reductions where copy still repeats what the visual already says.
-          shorter = {
-              '真正缺少的是把比利时品牌传统转化为英国消费者能够理解、体验并愿意为之付费的本地价值。':'',
-              '选择 Afternoon Tea，不是因为它“很英国”，而是因为它同时连接 Premium、Gifting、Social Occasion 与 Food Pairing，与 Godiva 的品牌资产具有更强的一致性。':'',
-              'H&amp;M 擅长获得注意力，UNIQLO 擅长降低购买摩擦，但两者都还不是完整的社交媒体系统。':'',
-              '社交媒体表现，本质上是系统匹配问题。':'',
-              '最强的社交媒体策略不是在互动与转化之间二选一，而是让每个平台在消费者旅程中承担清晰角色。':'',
-              '真正的问题不是让 Godiva 看起来更高端，而是让它的高端价值与英国消费者重新产生关系。':''
-          }
-          for a,b in shorter.items():
-              s = s.replace(a,b)
-
-          # Renumber only what remains. IDs stay stable so anchors keep working.
-          labels = {
-              'a2':'01 / 市场变化','a3':'02 / 付费价值','a4':'03 / 潜在需求','a5':'04 / 竞争格局','a6':'05 / 机会判断','a7':'06 / 下一增长假设',
-              'g2':'01 / 市场表现','g3':'02 / 核心结论','g4':'03 / 策略方案','g6':'04 / 消费者旅程','g8':'05 / 衡量指标',
-              'f2':'01 / 数据对比','f3':'02 / 核心结论','f4':'03 / 平台角色','f5':'04 / H&amp;M 优化','f6':'05 / UNIQLO 优化','f7':'06 / 消费者路径',
-              'r2':'01 / 研究模型','r3':'02 / 研究设计','r4':'03 / 关键结果','r5':'04 / 中介效应','r6':'05 / 营销启示'
-          }
-          for bid,label in labels.items():
-              s = set_label(s, bid, label)
-
-          s = set_tabs(s, 'ca', [('a2','01 市场变化'),('a3','02 付费价值'),('a4','03 潜在需求'),('a5','04 竞争格局'),('a6','05 机会判断'),('a7','06 增长假设')])
-          s = set_tabs(s, 'cg', [('g2','01 市场表现'),('g3','02 核心结论'),('g4','03 策略方案'),('g6','04 消费者旅程'),('g8','05 衡量指标')])
-          s = set_tabs(s, 'cf', [('f2','01 数据对比'),('f3','02 核心结论'),('f4','03 平台角色'),('f5','04 H&M 优化'),('f6','05 UNIQLO 优化'),('f7','06 消费者路径')])
-          s = set_tabs(s, 'cr', [('r2','01 研究模型'),('r3','02 研究设计'),('r4','03 关键结果'),('r5','04 中介效应'),('r6','05 营销启示')])
-
-          # The AI forecast is a hypothesis, not another black "conclusion". Keep it visually lighter.
-          css = '''.core-conclusion .ct h2{max-width:850px}.logic-hyp{background:var(--p)!important;color:var(--i)!important;border-color:var(--l)!important}.logic-hyp .logic-label{color:var(--u)!important}.logic-hyp .logic-body h3{color:var(--i)!important}.logic-hyp .logic-body p{color:var(--m)!important;opacity:1!important}'''
-          if css not in s:
-              s = s.replace('</style>', css + '</style>', 1)
-
-          # Clean empty paragraphs produced by reductions.
-          s = s.replace('<p></p>', '')
-          s = re.sub(r'<p>\s*</p>', '', s)
+          # Remove CSS that only served that visual.
+          s = re.sub(r'\.campaign-preview\{.*?@media\(max-width:720px\)\{\.campaign-inner.*?\}\}', '', s, flags=re.S)
 
           p.write_text(s, encoding='utf-8')
           PY
@@ -160,5 +44,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Tighten case sections and remove repeated conclusions"
+          git commit -m "Remove GODIVA campaign visual"
           git push
