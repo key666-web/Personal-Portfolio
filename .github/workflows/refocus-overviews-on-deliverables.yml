@@ -1,4 +1,4 @@
-name: Refine H&M case typography
+name: Replace H&M analysis with visual
 
 on:
   push:
@@ -14,24 +14,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Reduce H&M case title sizes
+      - name: Replace H&M analysis sections with visual
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
+          import re
 
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
 
-          css = r'''/* HM_TYPOGRAPHY_V1 */
-          #cf .ch h1{font-size:clamp(46px,6vw,72px)!important;line-height:.98!important;letter-spacing:-.055em!important}
-          #cf .ct h2{font-size:clamp(26px,3vw,38px)!important;line-height:1.10!important;letter-spacing:-.035em!important;max-width:920px}
-          #cf .overview-row.result .overview-text strong{font-size:clamp(24px,2.6vw,32px)!important;line-height:1.18!important}
-          #cf .box h3{font-size:16px!important;line-height:1.28!important;letter-spacing:-.01em!important}
-          @media(max-width:720px){#cf .ch h1{font-size:clamp(40px,12vw,56px)!important}#cf .ct h2{font-size:clamp(24px,7vw,32px)!important}}
+          css = r'''/* HM_GROWTH_VISUAL_V1 */
+          #cf #f4 .growth-visual{margin-top:22px}
+          #cf #f4 .growth-visual img{display:block;width:100%;height:auto;border-radius:20px;border:1px solid var(--l);background:#f6f3ed;box-shadow:0 10px 28px rgba(17,17,17,.06)}
+          @media(max-width:720px){#cf #f4 .growth-visual{margin-top:14px}#cf #f4 .growth-visual img{border-radius:14px}}
           '''
-          if '/* HM_TYPOGRAPHY_V1 */' not in s:
+          if '/* HM_GROWTH_VISUAL_V1 */' not in s:
               s = s.replace('</style>', css + '</style>', 1)
+
+          old_tabs = '<a href="#f2">01 数据对比</a><a href="#f3">02 核心结论</a><a href="#f4">03 平台角色</a><a href="#f5">04 H&amp;M 优化</a><a href="#f6">05 UNIQLO｜优势与缺口</a><a href="#f7">06 数据发现</a><a href="#f8">07 策略延伸</a>'
+          new_tabs = '<a href="#f2">01 数据对比</a><a href="#f3">02 核心结论</a><a href="#f4">03 增长逻辑</a><a href="#f7">04 数据发现</a><a href="#f8">05 策略延伸</a>'
+          s = s.replace(old_tabs, new_tabs, 1)
+
+          visual = '''<div class="block" id="f4"><div class="s lay"><div class="lab">增长逻辑</div><div class="ct"><h2>两种社媒增长逻辑</h2><div class="growth-visual"><img src="assets/hm-uniqlo-growth.svg" alt="H&M 与 UNIQLO 两种社媒增长逻辑对比"/></div></div></div></div>'''
+          pattern = r'<div class="block" id="f4">.*?(?=<div class="block" id="f7">)'
+          if not re.search(pattern, s, flags=re.S):
+              raise SystemExit('H&M sections f4-f6 not found')
+          s = re.sub(pattern, visual, s, count=1, flags=re.S)
 
           p.write_text(s, encoding='utf-8')
           PY
@@ -42,5 +51,5 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
-          git commit -m "Reduce H&M case title sizes"
+          git commit -m "Replace H&M analysis sections with visual"
           git push
