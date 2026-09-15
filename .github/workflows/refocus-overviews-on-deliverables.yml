@@ -19,16 +19,9 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
-
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          css = '''/* TYPOGRAPHY_BALANCE_V3 */
-.case .ct h2{font-size:clamp(28px,3vw,40px)!important;line-height:1.08!important;letter-spacing:-.035em!important;max-width:900px}
-.case .core-conclusion .ct h2{font-size:clamp(32px,3.6vw,46px)!important;line-height:1.08!important;max-width:900px}
-.case .logic-body h3{font-size:clamp(20px,2.1vw,28px)!important;line-height:1.2!important;letter-spacing:-.025em!important}
-.case .overview-row.result .overview-text strong{font-size:clamp(24px,2.5vw,32px)!important;line-height:1.18!important}
-@media(max-width:720px){.case .ct h2{font-size:clamp(27px,7.5vw,36px)!important}.case .core-conclusion .ct h2{font-size:clamp(30px,8vw,40px)!important}}
-'''
+          css = '/* TYPOGRAPHY_BALANCE_V3 */.case .ct h2{font-size:clamp(28px,3vw,40px)!important;line-height:1.08!important;letter-spacing:-.035em!important;max-width:900px}.case .core-conclusion .ct h2{font-size:clamp(32px,3.6vw,46px)!important;line-height:1.08!important;max-width:900px}.case .logic-body h3{font-size:clamp(20px,2.1vw,28px)!important;line-height:1.2!important;letter-spacing:-.025em!important}.case .overview-row.result .overview-text strong{font-size:clamp(24px,2.5vw,32px)!important;line-height:1.18!important}@media(max-width:720px){.case .ct h2{font-size:clamp(27px,7.5vw,36px)!important}.case .core-conclusion .ct h2{font-size:clamp(30px,8vw,40px)!important}}'
           if '/* TYPOGRAPHY_BALANCE_V3 */' not in s:
               s = s.replace('</style>', css + '</style>', 1)
           p.write_text(s, encoding='utf-8')
