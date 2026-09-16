@@ -23,6 +23,7 @@ jobs:
             .tmp/hmfix_01.txt \
             .tmp/hmfix_02.txt \
             .tmp/hmfix_03a.txt \
+            .tmp/hmfix_03pre.txt \
             .tmp/hmfix_03b.txt \
             .tmp/hmfix_04a.txt \
             .tmp/hmfix_04b.txt \
@@ -49,8 +50,9 @@ jobs:
 
           rm -f assets/hm-uniqlo-growth.svg
           rm -f .tmp/hmfix_00.txt .tmp/hmfix_01.txt .tmp/hmfix_02.txt \
-                .tmp/hmfix_03a.txt .tmp/hmfix_03b.txt .tmp/hmfix_04a.txt \
-                .tmp/hmfix_04b.txt .tmp/hmfix_05a.txt .tmp/hmfix_05b.txt
+                .tmp/hmfix_03a.txt .tmp/hmfix_03pre.txt .tmp/hmfix_03b.txt \
+                .tmp/hmfix_04a.txt .tmp/hmfix_04b.txt .tmp/hmfix_05a.txt \
+                .tmp/hmfix_05b.txt
 
       - name: Commit repaired asset
         shell: bash
