@@ -1,4 +1,4 @@
-name: Fix H&M visual asset
+name: Rebuild H&M visual correctly
 
 on:
   push:
@@ -14,24 +14,50 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Switch H&M visual reference to WebP
+      - name: Rebuild verified H&M WebP
         shell: bash
         run: |
+          set -euo pipefail
+          cat \
+            .tmp/hmfix_00.txt \
+            .tmp/hmfix_01.txt \
+            .tmp/hmfix_02.txt \
+            .tmp/hmfix_03a.txt \
+            .tmp/hmfix_03b.txt \
+            .tmp/hmfix_04a.txt \
+            .tmp/hmfix_04b.txt \
+            .tmp/hmfix_05a.txt \
+            .tmp/hmfix_05b.txt \
+            | tr -d '\n\r ' | base64 -d > assets/hm-uniqlo-growth.webp
+
           python - <<'PY'
           from pathlib import Path
+          import hashlib
+          img = Path('assets/hm-uniqlo-growth.webp')
+          data = img.read_bytes()
+          assert len(data) == 39052, f'wrong image size: {len(data)}'
+          assert data[:4] == b'RIFF' and data[8:12] == b'WEBP', 'not a valid WebP header'
+          digest = hashlib.sha256(data).hexdigest()
+          assert digest == '066a1b48b752e0f3989b3102d82c89ce503c3be9f520dbefa6da0495da747239', digest
+
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          s = s.replace('assets/hm-uniqlo-growth.svg','assets/hm-uniqlo-growth.webp')
-          s = s.replace('assets/hm-uniqlo-growth.jpg','assets/hm-uniqlo-growth.webp')
+          s = s.replace('assets/hm-uniqlo-growth.svg', 'assets/hm-uniqlo-growth.webp')
+          s = s.replace('assets/hm-uniqlo-growth.jpg', 'assets/hm-uniqlo-growth.webp')
           p.write_text(s, encoding='utf-8')
           PY
-      - name: Commit update
+
+          rm -f assets/hm-uniqlo-growth.svg
+          rm -f .tmp/hmfix_00.txt .tmp/hmfix_01.txt .tmp/hmfix_02.txt \
+                .tmp/hmfix_03a.txt .tmp/hmfix_03b.txt .tmp/hmfix_04a.txt \
+                .tmp/hmfix_04b.txt .tmp/hmfix_05a.txt .tmp/hmfix_05b.txt
+
+      - name: Commit repaired asset
         shell: bash
         run: |
-          if git diff --quiet; then exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html
-          git commit -m "Point H&M visual to WebP asset"
+          git add -A index.html assets .tmp
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "Repair H&M growth visual asset"
           git push
-# retrigger after binary asset repair
