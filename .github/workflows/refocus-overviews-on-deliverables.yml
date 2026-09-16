@@ -1,4 +1,4 @@
-name: Replace H&M analysis with visual
+name: Use actual H&M visual image
 
 on:
   push:
@@ -14,42 +14,40 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Replace H&M analysis sections with visual
+      - name: Replace simplified SVG with approved H&M visual
         shell: bash
         run: |
+          set -euo pipefail
+          cat \
+            .tmp/hm_growth_00.txt \
+            .tmp/hm_growth_01.txt \
+            .tmp/hm_growth_02.txt \
+            .tmp/hm_growth_03.txt \
+            .tmp/hm_growth_04.txt \
+            .tmp/hm_growth_05.txt \
+            | base64 -d > assets/hm-uniqlo-growth.jpg
+
           python - <<'PY'
           from pathlib import Path
-          import re
-
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-
-          css = r'''/* HM_GROWTH_VISUAL_V1 */
-          #cf #f4 .growth-visual{margin-top:22px}
-          #cf #f4 .growth-visual img{display:block;width:100%;height:auto;border-radius:20px;border:1px solid var(--l);background:#f6f3ed;box-shadow:0 10px 28px rgba(17,17,17,.06)}
-          @media(max-width:720px){#cf #f4 .growth-visual{margin-top:14px}#cf #f4 .growth-visual img{border-radius:14px}}
-          '''
-          if '/* HM_GROWTH_VISUAL_V1 */' not in s:
-              s = s.replace('</style>', css + '</style>', 1)
-
-          old_tabs = '<a href="#f2">01 数据对比</a><a href="#f3">02 核心结论</a><a href="#f4">03 平台角色</a><a href="#f5">04 H&amp;M 优化</a><a href="#f6">05 UNIQLO｜优势与缺口</a><a href="#f7">06 数据发现</a><a href="#f8">07 策略延伸</a>'
-          new_tabs = '<a href="#f2">01 数据对比</a><a href="#f3">02 核心结论</a><a href="#f4">03 增长逻辑</a><a href="#f7">04 数据发现</a><a href="#f8">05 策略延伸</a>'
-          s = s.replace(old_tabs, new_tabs, 1)
-
-          visual = '''<div class="block" id="f4"><div class="s lay"><div class="lab">增长逻辑</div><div class="ct"><h2>两种社媒增长逻辑</h2><div class="growth-visual"><img src="assets/hm-uniqlo-growth.svg" alt="H&M 与 UNIQLO 两种社媒增长逻辑对比"/></div></div></div></div>'''
-          pattern = r'<div class="block" id="f4">.*?(?=<div class="block" id="f7">)'
-          if not re.search(pattern, s, flags=re.S):
-              raise SystemExit('H&M sections f4-f6 not found')
-          s = re.sub(pattern, visual, s, count=1, flags=re.S)
-
+          old = 'assets/hm-uniqlo-growth.svg'
+          new = 'assets/hm-uniqlo-growth.jpg'
+          if old not in s and new not in s:
+              raise SystemExit('H&M growth visual reference not found')
+          s = s.replace(old, new)
           p.write_text(s, encoding='utf-8')
           PY
+
+          rm -f assets/hm-uniqlo-growth.svg
+          rm -f .tmp/hm_growth_00.txt .tmp/hm_growth_01.txt .tmp/hm_growth_02.txt .tmp/hm_growth_03.txt .tmp/hm_growth_04.txt .tmp/hm_growth_05.txt
+
       - name: Commit update
         shell: bash
         run: |
-          if git diff --quiet; then exit 0; fi
+          if git diff --quiet -- . ':!.github/workflows/refocus-overviews-on-deliverables.yml'; then exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.html
-          git commit -m "Replace H&M analysis sections with visual"
+          git add -A index.html assets .tmp
+          git commit -m "Use approved H&M growth visual"
           git push
