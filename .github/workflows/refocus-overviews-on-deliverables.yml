@@ -34,3 +34,4 @@ jobs:
           git add index.html
           git commit -m "Point H&M visual to WebP asset"
           git push
+# retrigger after binary asset repair
