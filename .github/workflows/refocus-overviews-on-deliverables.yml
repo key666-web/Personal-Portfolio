@@ -1,4 +1,4 @@
-name: Build compact H&M data charts
+name: "Build compact H&M data charts"
 
 on:
   push:
@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Replace H&M metric cards with compact charts
+      - name: "Replace H&M metric cards with compact charts"
         shell: bash
         run: |
           set -euo pipefail
@@ -110,7 +110,7 @@ jobs:
           p.write_text(s, encoding='utf-8')
           PY
 
-      - name: Commit H&M data chart update
+      - name: "Commit H&M data chart update"
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
