@@ -1,4 +1,4 @@
-name: Apply true black and white GODIVA funnel
+name: Build compact H&M data charts
 
 on:
   push:
@@ -14,17 +14,108 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Patch GODIVA funnel
+      - name: Replace H&M metric cards with compact charts
         shell: bash
         run: |
-          echo 'CmZyb20gcGF0aGxpYiBpbXBvcnQgUGF0aAppbXBvcnQgcmUKCnAgPSBQYXRoKCJpbmRleC5odG1sIikKcyA9IHAucmVhZF90ZXh0KGVuY29kaW5nPSJ1dGYtOCIpCmFzc2VydCAnaWQ9ImNnIicgaW4gcywgIkdPRElWQSBjYXNlICNjZyBub3QgZm91bmQiCmFzc2VydCBhbGwoeCBpbiBzIGZvciB4IGluIFsi5ZOB54mM5Y+v6KeB5bqm5LiN6LazIiwi5pys5Zyw55u45YWz5oCn5LiN6LazIiwi6auY56uv5L2T6aqM5LiN5LiA6Ie0Il0pLCAiR09ESVZBIGpvdXJuZXkgc2VjdGlvbiBub3QgZm91bmQiCgpzID0gcmUuc3ViKHInL1wqIEdPRElWQV9KT1VSTkVZX0ZVTk5FTF9WXGQrIFwqLy4qPy9cKiBFTkRfR09ESVZBX0pPVVJORVlfRlVOTkVMX1ZcZCsgXCovJywgJycsIHMsIGZsYWdzPXJlLlMpCnMgPSByZS5zdWIocic8IS0tIEdPRElWQV9KT1VSTkVZX0ZVTk5FTF9WXGQrIC0tPi4qPzwhLS0gRU5EX0dPRElWQV9KT1VSTkVZX0ZVTk5FTF9WXGQrIC0tPicsICcnLCBzLCBmbGFncz1yZS5TKQoKY3NzID0gcicnJwovKiBHT0RJVkFfSk9VUk5FWV9GVU5ORUxfVjQgKi8KI2NnIC5nb2RpdmEtam91cm5leS1ibG9jayAubGF5e2dyaWQtdGVtcGxhdGUtY29sdW1uczoxZnI7Z2FwOjB9CiNjZyAuZ29kaXZhLWpvdXJuZXktYmxvY2sgLmxhYntkaXNwbGF5Om5vbmV9CiNjZyAuZ29kaXZhLWpvdXJuZXktYmxvY2sgLmN0e3dpZHRoOjEwMCV9CiNjZyAuZ29kaXZhLWpvdXJuZXktYmxvY2sgLmN0IGgye21hcmdpbi1ib3R0b206MzRweDttYXgtd2lkdGg6bm9uZX0KI2NnIC5qb3VybmV5LWZ1bm5lbC12NHtkaXNwbGF5OmdyaWQ7Z3JpZC10ZW1wbGF0ZS1jb2x1bW5zOm1pbm1heCgwLDEuMDhmcikgbWlubWF4KDI4MHB4LC45MmZyKTtnYXA6NThweDthbGlnbi1pdGVtczpzdGFydDttYXgtd2lkdGg6OTgwcHh9CiNjZyAuZnVubmVsLXY0e2Rpc3BsYXk6ZmxleDtmbGV4LWRpcmVjdGlvbjpjb2x1bW47YWxpZ24taXRlbXM6Y2VudGVyO2dhcDo4cHg7d2lkdGg6MTAwJX0KI2NnIC5mdjQtc3RhZ2V7cG9zaXRpb246cmVsYXRpdmU7aGVpZ2h0Ojg2cHg7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6Y2VudGVyO3RleHQtYWxpZ246Y2VudGVyO2NvbG9yOiMxMTF9CiNjZyAuZnY0LXN0YWdlOm50aC1jaGlsZCgxKXt3aWR0aDoxMDAlfQojY2cgLmZ2NC1zdGFnZTpudGgtY2hpbGQoMil7d2lkdGg6ODQlfQojY2cgLmZ2NC1zdGFnZTpudGgtY2hpbGQoMyl7d2lkdGg6NjglfQojY2cgLmZ2NC1zdGFnZTpudGgtY2hpbGQoNCl7d2lkdGg6NTIlfQojY2cgLmZ2NC1zdGFnZSBzdmd7cG9zaXRpb246YWJzb2x1dGU7aW5zZXQ6MDt3aWR0aDoxMDAlO2hlaWdodDoxMDAlO292ZXJmbG93OnZpc2libGV9CiNjZyAuZnY0LXN0YWdlIHBhdGh7ZmlsbDojZmZmO3N0cm9rZTojMTExO3N0cm9rZS13aWR0aDoxLjE1O3ZlY3Rvci1lZmZlY3Q6bm9uLXNjYWxpbmctc3Ryb2tlfQojY2cgLmZ2NC1jb3B5e3Bvc2l0aW9uOnJlbGF0aXZlO3otaW5kZXg6MjtkaXNwbGF5OmZsZXg7ZmxleC1kaXJlY3Rpb246Y29sdW1uO2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6Y2VudGVyO3BhZGRpbmc6MCAyMHB4fQojY2cgLmZ2NC1raWNrZXJ7Zm9udC1zaXplOjEwcHg7bGluZS1oZWlnaHQ6MS4yO2ZvbnQtd2VpZ2h0OjUwMDttYXJnaW4tYm90dG9tOjZweDtjb2xvcjojMTExfQojY2cgLmZ2NC1pc3N1ZXtmb250LXNpemU6MTdweDtsaW5lLWhlaWdodDoxLjI7Zm9udC13ZWlnaHQ6ODAwO2xldHRlci1zcGFjaW5nOi0uMDI1ZW07Y29sb3I6IzExMX0KI2NnIC5mdjQtc29sdXRpb25ze2Rpc3BsYXk6Z3JpZDtncmlkLXRlbXBsYXRlLXJvd3M6cmVwZWF0KDQsODZweCk7Z2FwOjhweH0KI2NnIC5mdjQtc29sdXRpb257cG9zaXRpb246cmVsYXRpdmU7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtwYWRkaW5nLWxlZnQ6NjJweDtjb2xvcjojMTExfQojY2cgLmZ2NC1zb2x1dGlvbjpiZWZvcmV7Y29udGVudDoiIjtwb3NpdGlvbjphYnNvbHV0ZTtsZWZ0OjA7dG9wOjUwJTt3aWR0aDo0MnB4O2JvcmRlci10b3A6MXB4IHNvbGlkICMxMTF9CiNjZyAuZnY0LXNvbHV0aW9uOmFmdGVye2NvbnRlbnQ6IiI7cG9zaXRpb246YWJzb2x1dGU7bGVmdDo0MXB4O3RvcDpjYWxjKDUwJSAtIDJweCk7d2lkdGg6NHB4O2hlaWdodDo0cHg7YmFja2dyb3VuZDojMTExO2JvcmRlci1yYWRpdXM6NTAlfQojY2cgLmZ2NC1zb2x1dGlvbiBzdHJvbmd7ZGlzcGxheTpibG9jaztmb250LXNpemU6MTdweDtsaW5lLWhlaWdodDoxLjI7bGV0dGVyLXNwYWNpbmc6LS4wMmVtO21hcmdpbi1ib3R0b206NXB4O2NvbG9yOiMxMTF9CiNjZyAuZnY0LXNvbHV0aW9uIHB7bWFyZ2luOjAhaW1wb3J0YW50O21heC13aWR0aDoyOTBweCFpbXBvcnRhbnQ7Zm9udC1zaXplOjExLjVweCFpbXBvcnRhbnQ7bGluZS1oZWlnaHQ6MS40NSFpbXBvcnRhbnQ7Y29sb3I6IzU1NSFpbXBvcnRhbnR9CkBtZWRpYShtYXgtd2lkdGg6ODIwcHgpewogICNjZyAuam91cm5leS1mdW5uZWwtdjR7Z3JpZC10ZW1wbGF0ZS1jb2x1bW5zOjFmcjtnYXA6MjRweDttYXgtd2lkdGg6NjIwcHh9CiAgI2NnIC5mdjQtc29sdXRpb25ze2dyaWQtdGVtcGxhdGUtcm93czpub25lO2dhcDo4cHh9CiAgI2NnIC5mdjQtc29sdXRpb257bWluLWhlaWdodDo1OHB4O3BhZGRpbmctbGVmdDo1MnB4fQogICNjZyAuZnY0LXNvbHV0aW9uOmJlZm9yZXt3aWR0aDozNHB4fQogICNjZyAuZnY0LXNvbHV0aW9uOmFmdGVye2xlZnQ6MzNweH0KfQpAbWVkaWEobWF4LXdpZHRoOjUyMHB4KXsKICAjY2cgLmdvZGl2YS1qb3VybmV5LWJsb2NrIC5jdCBoMnttYXJnaW4tYm90dG9tOjI2cHh9CiAgI2NnIC5mdjQtc3RhZ2V7aGVpZ2h0Ojc4cHh9CiAgI2NnIC5mdjQtc3RhZ2U6bnRoLWNoaWxkKDIpe3dpZHRoOjg4JX0KICAjY2cgLmZ2NC1zdGFnZTpudGgtY2hpbGQoMyl7d2lkdGg6NzYlfQogICNjZyAuZnY0LXN0YWdlOm50aC1jaGlsZCg0KXt3aWR0aDo2NCV9CiAgI2NnIC5mdjQtY29weXtwYWRkaW5nOjAgMTBweH0KICAjY2cgLmZ2NC1pc3N1ZXtmb250LXNpemU6MTVweH0KICAjY2cgLmZ2NC1raWNrZXJ7Zm9udC1zaXplOjlweH0KfQovKiBFTkRfR09ESVZBX0pPVVJORVlfRlVOTkVMX1Y0ICovCicnJwpzID0gcy5yZXBsYWNlKCI8L3N0eWxlPiIsIGNzcyArICI8L3N0eWxlPiIsIDEpCgpqcyA9IHInJycKPCEtLSBHT0RJVkFfSk9VUk5FWV9GVU5ORUxfVjQgLS0+CjxzY3JpcHQ+CigoKT0+ewogIGNvbnN0IHJvb3Q9ZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2NnJyk7IGlmKCFyb290KSByZXR1cm47CiAgY29uc3QgdGFyZ2V0PVsuLi5yb290LnF1ZXJ5U2VsZWN0b3JBbGwoJy5jdCcpXS5maW5kKGVsID0+CiAgICBlbC50ZXh0Q29udGVudC5pbmNsdWRlcygn5ZOB54mM5Y+v6KeB5bqm5LiN6LazJykgJiYKICAgIGVsLnRleHRDb250ZW50LmluY2x1ZGVzKCfmnKzlnLDnm7jlhbPmgKfkuI3otrMnKSAmJgogICAgZWwudGV4dENvbnRlbnQuaW5jbHVkZXMoJ+mrmOerr+S9k+mqjOS4jeS4gOiHtCcpCiAgKTsKICBpZighdGFyZ2V0KSByZXR1cm47CiAgY29uc3QgYmxvY2s9dGFyZ2V0LmNsb3Nlc3QoJy5ibG9jaycpOyBpZihibG9jaykgYmxvY2suY2xhc3NMaXN0LmFkZCgnZ29kaXZhLWpvdXJuZXktYmxvY2snKTsKICBjb25zdCBzaGFwZT1gPHN2ZyB2aWV3Qm94PSIwIDAgNTIwIDg2IiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBhcmlhLWhpZGRlbj0idHJ1ZSI+PHBhdGggZD0iTTI0IDUgUTI2MCAtMyA0OTYgNSBMNDYyIDc4IFEyNjAgODggNTggNzggWiIvPjwvc3ZnPmA7CiAgdGFyZ2V0LmlubmVySFRNTD1gCiAgICA8aDI+5raI6LS56ICF5peF56iL5Zuw5aKDPC9oMj4KICAgIDxkaXYgY2xhc3M9ImpvdXJuZXktZnVubmVsLXY0IiBhcmlhLWxhYmVsPSJHT0RJVkEg5raI6LS56ICF5peF56iL5Zuw5aKD5LiO5a+55bqU6Kej5Yaz5pa55qGIIj4KICAgICAgPGRpdiBjbGFzcz0iZnVubmVsLXY0Ij4KICAgICAgICA8ZGl2IGNsYXNzPSJmdjQtc3RhZ2UiPiR7c2hhcGV9PGRpdiBjbGFzcz0iZnY0LWNvcHkiPjxzcGFuIGNsYXNzPSJmdjQta2lja2VyIj7orqTnn6UgLyDlhbTotqM8L3NwYW4+PHN0cm9uZyBjbGFzcz0iZnY0LWlzc3VlIj7lk4HniYzlj6/op4HluqbkuI3otrM8L3N0cm9uZz48L2Rpdj48L2Rpdj4KICAgICAgICA8ZGl2IGNsYXNzPSJmdjQtc3RhZ2UiPiR7c2hhcGV9PGRpdiBjbGFzcz0iZnY0LWNvcHkiPjxzcGFuIGNsYXNzPSJmdjQta2lja2VyIj7ogIPomZE8L3NwYW4+PHN0cm9uZyBjbGFzcz0iZnY0LWlzc3VlIj7mnKzlnLDnm7jlhbPmgKfkuI3otrM8L3N0cm9uZz48L2Rpdj48L2Rpdj4KICAgICAgICA8ZGl2IGNsYXNzPSJmdjQtc3RhZ2UiPiR7c2hhcGV9PGRpdiBjbGFzcz0iZnY0LWNvcHkiPjxzcGFuIGNsYXNzPSJmdjQta2lja2VyIj7otK3kubAgLyDlsaXnuqY8L3NwYW4+PHN0cm9uZyBjbGFzcz0iZnY0LWlzc3VlIj7pq5jnq6/kvZPpqozkuI3kuIDoh7Q8L3N0cm9uZz48L2Rpdj48L2Rpdj4KICAgICAgICA8ZGl2IGNsYXNzPSJmdjQtc3RhZ2UiPiR7c2hhcGV9PGRpdiBjbGFzcz0iZnY0LWNvcHkiPjxzcGFuIGNsYXNzPSJmdjQta2lja2VyIj7lpI3otK0gLyDnlZnlrZg8L3NwYW4+PHN0cm9uZyBjbGFzcz0iZnY0LWlzc3VlIj7otJ/pnaLkvZPpqozlvbHlk43lpI3otK08L3N0cm9uZz48L2Rpdj48L2Rpdj4KICAgICAgPC9kaXY+CiAgICAgIDxkaXYgY2xhc3M9ImZ2NC1zb2x1dGlvbnMiIGFyaWEtbGFiZWw9IuWvueW6lOino+WGs+aWueahiCI+CiAgICAgICAgPGRpdiBjbGFzcz0iZnY0LXNvbHV0aW9uIj48ZGl2PjxzdHJvbmc+5o+Q5Y2H5ZOB54mM5pud5YWJPC9zdHJvbmc+PHA+5by65YyW5pCc57Si5LiO56S+5aqS6Kem54K5PC9wPjwvZGl2PjwvZGl2PgogICAgICAgIDxkaXYgY2xhc3M9ImZ2NC1zb2x1dGlvbiI+PGRpdj48c3Ryb25nPuW7uueri+acrOWcsOWFs+iBlDwvc3Ryb25nPjxwPuS7peacrOWcsOWMluWGheWuuei/nuaOpeiLseWbvea2iOi0ueWcuuaZrzwvcD48L2Rpdj48L2Rpdj4KICAgICAgICA8ZGl2IGNsYXNzPSJmdjQtc29sdXRpb24iPjxkaXY+PHN0cm9uZz7kv67lpI3mtojotLnkvZPpqow8L3N0cm9uZz48cD7kvJjljJbljIXoo4XjgIHphY3pgIHkuI7lrqLmnI08L3A+PC9kaXY+PC9kaXY+CiAgICAgICAgPGRpdiBjbGFzcz0iZnY0LXNvbHV0aW9uIj48ZGl2PjxzdHJvbmc+5by65YyW5a6i5oi35YWz57O7PC9zdHJvbmc+PHA+5ZSu5ZCO6Lef6L+b5LiO5aSN6LSt6L+Q6JClPC9wPjwvZGl2PjwvZGl2PgogICAgICA8L2Rpdj4KICAgIDwvZGl2PmA7Cn0pKCk7Cjwvc2NyaXB0Pgo8IS0tIEVORF9HT0RJVkFfSk9VUk5FWV9GVU5ORUxfVjQgLS0+CicnJwpzID0gcy5yZXBsYWNlKCI8L2JvZHk+IiwganMgKyAiPC9ib2R5PiIsIDEpCnAud3JpdGVfdGV4dChzLCBlbmNvZGluZz0idXRmLTgiKQo=' | base64 -d > /tmp/patch.py
-          python /tmp/patch.py
-      - name: Commit funnel redesign
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          assert 'id="cf"' in s, 'H&M case #cf not found'
+          assert '69.63' in s and '46.93M' in s, 'H&M data section not found'
+
+          s = re.sub(r'/\* HM_DATA_VIZ_V1 \*/.*?/\* END_HM_DATA_VIZ_V1 \*/', '', s, flags=re.S)
+          s = re.sub(r'<!-- HM_DATA_VIZ_V1 -->.*?<!-- END_HM_DATA_VIZ_V1 -->', '', s, flags=re.S)
+
+          css = r'''
+/* HM_DATA_VIZ_V1 */
+#cf .hm-data-viz-block .ct h2{margin-bottom:24px}
+#cf .hm-data-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:6px}
+#cf .hm-chart{background:var(--p);border:1px solid var(--l);border-radius:16px;padding:18px;min-height:210px}
+#cf .hm-chart-kicker{font-size:9px;letter-spacing:.09em;font-weight:800;color:var(--u);margin-bottom:7px}
+#cf .hm-chart h3{font-size:17px;line-height:1.2;letter-spacing:-.025em;margin:0 0 18px}
+#cf .hm-row{display:grid;grid-template-columns:64px 1fr 74px;gap:10px;align-items:center;margin:13px 0}
+#cf .hm-row b{font-size:11px}
+#cf .hm-row strong{font-size:15px;text-align:right;letter-spacing:-.02em}
+#cf .hm-track{height:7px;background:#e7e5de;position:relative;overflow:hidden}
+#cf .hm-fill{display:block;height:100%;background:#111}
+#cf .hm-sub{font-size:9.5px;color:var(--m);margin-top:-6px;margin-bottom:4px;padding-left:74px}
+#cf .hm-diverge{position:relative;height:58px;margin:3px 0 8px}
+#cf .hm-axis{position:absolute;left:50%;top:0;bottom:0;width:1px;background:#c9c7c0}
+#cf .hm-pos,#cf .hm-neg{position:absolute;height:9px;background:#111}
+#cf .hm-pos{left:50%;top:8px;width:43%}
+#cf .hm-neg{right:50%;bottom:8px;width:35%}
+#cf .hm-div-label{position:absolute;font-size:10px;font-weight:700}
+#cf .hm-div-label.hm-l1{left:50%;top:23px;transform:translateX(7px)}
+#cf .hm-div-label.hm-l2{right:50%;bottom:23px;transform:translateX(-7px)}
+#cf .hm-data-judgements{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+#cf .hm-judge{border-top:1px solid #111;padding:14px 2px 0}
+#cf .hm-judge span{display:block;font-size:9px;color:var(--u);font-weight:800;letter-spacing:.08em;margin-bottom:6px}
+#cf .hm-judge strong{font-size:17px;line-height:1.3;letter-spacing:-.025em}
+#cf .hm-data-note{font-size:9.5px;color:var(--m);margin-top:14px}
+@media(max-width:820px){#cf .hm-data-grid{grid-template-columns:1fr}#cf .hm-chart{min-height:auto}#cf .hm-data-judgements{grid-template-columns:1fr}}
+/* END_HM_DATA_VIZ_V1 */
+'''
+          s = s.replace('</style>', css + '</style>', 1)
+
+          js = r'''
+<!-- HM_DATA_VIZ_V1 -->
+<script>
+(()=>{
+  const root=document.getElementById('cf');if(!root)return;
+  const target=[...root.querySelectorAll('.ct')].find(el=>el.textContent.includes('69.63')&&el.textContent.includes('46.93M'));
+  if(!target)return;
+  const block=target.closest('.block');if(block)block.classList.add('hm-data-viz-block');
+  target.innerHTML=`
+    <h2>数据对比</h2>
+    <div class="hm-data-grid">
+      <div class="hm-chart">
+        <div class="hm-chart-kicker">SOCIAL ENGAGEMENT</div>
+        <h3>TikTok 互动率变化</h3>
+        <div class="hm-diverge">
+          <span class="hm-axis"></span>
+          <span class="hm-pos"></span><span class="hm-neg"></span>
+          <span class="hm-div-label hm-l1">H&M +69.63%</span>
+          <span class="hm-div-label hm-l2">UNIQLO −56.15%</span>
+        </div>
+      </div>
+      <div class="hm-chart">
+        <div class="hm-chart-kicker">SOCIAL REACH</div>
+        <h3>Instagram 触达</h3>
+        <div class="hm-row"><b>H&M</b><div class="hm-track"><span class="hm-fill" style="width:100%"></span></div><strong>46.93M</strong></div>
+        <div class="hm-sub">增长 +120.74%</div>
+        <div class="hm-row"><b>UNIQLO</b><div class="hm-track"><span class="hm-fill" style="width:10%"></span></div><strong>4.69M</strong></div>
+        <div class="hm-sub">增长 +46.9%</div>
+      </div>
+      <div class="hm-chart">
+        <div class="hm-chart-kicker">SEARCH DISCOVERY</div>
+        <h3>非品牌搜索流量</h3>
+        <div class="hm-row"><b>H&M</b><div class="hm-track"><span class="hm-fill" style="width:7%"></span></div><strong>18.6K</strong></div>
+        <div class="hm-row"><b>UNIQLO</b><div class="hm-track"><span class="hm-fill" style="width:100%"></span></div><strong>257.2K</strong></div>
+      </div>
+    </div>
+    <div class="hm-data-judgements">
+      <div class="hm-judge"><span>H&M</span><strong>更擅长制造注意力与参与</strong></div>
+      <div class="hm-judge"><span>UNIQLO</span><strong>搜索发现更强，购买路径更清晰</strong></div>
+    </div>
+    <div class="hm-data-note">项目观察期数据，用于比较两种社媒与搜索模式。</div>`;
+})();
+</script>
+<!-- END_HM_DATA_VIZ_V1 -->
+'''
+          s = s.replace('</body>', js + '</body>', 1)
+          p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Commit H&M data chart update
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
           if git diff --cached --quiet; then exit 0; fi
-          git commit -m "Redesign GODIVA journey as true funnel"
+          git commit -m "Simplify H&M data into compact charts"
           git push
