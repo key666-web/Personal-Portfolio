@@ -24,85 +24,50 @@ jobs:
 
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-
           assert 'id="cg"' in s, 'GODIVA case #cg not found'
-          assert '品牌可见度不足' in s, 'GODIVA journey section not found'
-          assert '本地相关性不足' in s, 'GODIVA journey section incomplete'
-          assert '高端体验不一致' in s, 'GODIVA journey section incomplete'
+          assert all(x in s for x in ['品牌可见度不足','本地相关性不足','高端体验不一致']), 'GODIVA journey section not found'
 
-          css = r'''
-/* GODIVA_JOURNEY_FUNNEL_V1 */
-#cg .godiva-journey-block .lay{grid-template-columns:1fr;gap:0}
-#cg .godiva-journey-block .lab{display:none}
-#cg .godiva-journey-block .ct{width:100%}
-#cg .godiva-journey-block .ct h2{margin-bottom:28px;max-width:none}
-#cg .journey-map{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:52px;align-items:start;max-width:980px}
-#cg .journey-funnel,#cg .journey-solutions{display:flex;flex-direction:column;gap:8px}
-#cg .funnel-stage{min-height:84px;background:#fff;border:1.25px solid #111;color:#111;display:flex;flex-direction:column;justify-content:center;padding:14px 24px;margin-inline:auto;border-radius:2px}
-#cg .funnel-stage:nth-child(1){width:100%}
-#cg .funnel-stage:nth-child(2){width:88%}
-#cg .funnel-stage:nth-child(3){width:76%}
-#cg .funnel-stage:nth-child(4){width:64%}
-#cg .funnel-stage span{font-size:10px;line-height:1.3;color:#555;margin-bottom:6px}
-#cg .funnel-stage strong{font-size:18px;line-height:1.25;letter-spacing:-.02em}
-#cg .solution-row{position:relative;min-height:84px;background:#fff;border:1.25px solid #111;color:#111;padding:14px 18px;display:flex;flex-direction:column;justify-content:center;border-radius:2px}
-#cg .solution-row:before{content:"";position:absolute;left:-53px;top:50%;width:52px;border-top:1px solid #111}
-#cg .solution-row strong{font-size:16px;line-height:1.25;margin-bottom:5px}
-#cg .solution-row p{margin:0!important;color:#555!important;font-size:11.5px!important;line-height:1.45!important;max-width:none!important}
-@media(max-width:760px){
-  #cg .journey-map{grid-template-columns:1fr;gap:18px}
-  #cg .funnel-stage{min-height:72px;padding:12px 18px}
-  #cg .solution-row{min-height:72px}
-  #cg .solution-row:before{display:none}
-  #cg .funnel-stage:nth-child(1){width:100%}
-  #cg .funnel-stage:nth-child(2){width:92%}
-  #cg .funnel-stage:nth-child(3){width:84%}
-  #cg .funnel-stage:nth-child(4){width:76%}
-}
-/* END_GODIVA_JOURNEY_FUNNEL_V1 */
-'''
+          css = "\n".join([
+            '/* GODIVA_JOURNEY_FUNNEL_V1 */',
+            '#cg .godiva-journey-block .lay{grid-template-columns:1fr;gap:0}',
+            '#cg .godiva-journey-block .lab{display:none}',
+            '#cg .godiva-journey-block .ct{width:100%}',
+            '#cg .godiva-journey-block .ct h2{margin-bottom:28px;max-width:none}',
+            '#cg .journey-map{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:52px;align-items:start;max-width:980px}',
+            '#cg .journey-funnel,#cg .journey-solutions{display:flex;flex-direction:column;gap:8px}',
+            '#cg .funnel-stage{min-height:84px;background:#fff;border:1.25px solid #111;color:#111;display:flex;flex-direction:column;justify-content:center;padding:14px 24px;margin-inline:auto;border-radius:2px}',
+            '#cg .funnel-stage:nth-child(1){width:100%}',
+            '#cg .funnel-stage:nth-child(2){width:88%}',
+            '#cg .funnel-stage:nth-child(3){width:76%}',
+            '#cg .funnel-stage:nth-child(4){width:64%}',
+            '#cg .funnel-stage span{font-size:10px;line-height:1.3;color:#555;margin-bottom:6px}',
+            '#cg .funnel-stage strong{font-size:18px;line-height:1.25;letter-spacing:-.02em}',
+            '#cg .solution-row{position:relative;min-height:84px;background:#fff;border:1.25px solid #111;color:#111;padding:14px 18px;display:flex;flex-direction:column;justify-content:center;border-radius:2px}',
+            '#cg .solution-row:before{content:"";position:absolute;left:-53px;top:50%;width:52px;border-top:1px solid #111}',
+            '#cg .solution-row strong{font-size:16px;line-height:1.25;margin-bottom:5px}',
+            '#cg .solution-row p{margin:0!important;color:#555!important;font-size:11.5px!important;line-height:1.45!important;max-width:none!important}',
+            '@media(max-width:760px){#cg .journey-map{grid-template-columns:1fr;gap:18px}#cg .funnel-stage{min-height:72px;padding:12px 18px}#cg .solution-row{min-height:72px}#cg .solution-row:before{display:none}#cg .funnel-stage:nth-child(1){width:100%}#cg .funnel-stage:nth-child(2){width:92%}#cg .funnel-stage:nth-child(3){width:84%}#cg .funnel-stage:nth-child(4){width:76%}}',
+            '/* END_GODIVA_JOURNEY_FUNNEL_V1 */'
+          ]) + "\n"
 
           s = re.sub(r'/\* GODIVA_JOURNEY_FUNNEL_V1 \*/.*?/\* END_GODIVA_JOURNEY_FUNNEL_V1 \*/', '', s, flags=re.S)
           s = s.replace('</style>', css + '</style>', 1)
 
-          js = r'''
-<!-- GODIVA_JOURNEY_FUNNEL_V1 -->
-<script>
-(()=>{
-  const root=document.getElementById('cg');
-  if(!root)return;
-  const target=[...root.querySelectorAll('.ct')].find(el=>
-    el.textContent.includes('品牌可见度不足') &&
-    el.textContent.includes('本地相关性不足') &&
-    el.textContent.includes('高端体验不一致')
-  );
-  if(!target)return;
-  const block=target.closest('.block');
-  if(block)block.classList.add('godiva-journey-block');
-  target.innerHTML=`
-    <h2>消费者旅程困境</h2>
-    <div class="journey-map" aria-label="GODIVA消费者旅程困境与解决方案">
-      <div class="journey-funnel">
-        <div class="funnel-stage"><span>认知 / 兴趣</span><strong>品牌可见度不足</strong></div>
-        <div class="funnel-stage"><span>考虑</span><strong>本地相关性不足</strong></div>
-        <div class="funnel-stage"><span>购买 / 履约</span><strong>高端体验不一致</strong></div>
-        <div class="funnel-stage"><span>复购 / 留存</span><strong>负面体验影响复购</strong></div>
-      </div>
-      <div class="journey-solutions">
-        <div class="solution-row"><strong>提升品牌曝光</strong><p>搜索与社媒协同触达</p></div>
-        <div class="solution-row"><strong>建立本地关联</strong><p>本地化内容连接英国消费场景</p></div>
-        <div class="solution-row"><strong>修复消费体验</strong><p>优化包装、配送与客服</p></div>
-        <div class="solution-row"><strong>强化客户关系</strong><p>售后跟进与复购运营</p></div>
-      </div>
-    </div>`;
-})();
-</script>
-<!-- END_GODIVA_JOURNEY_FUNNEL_V1 -->
-'''
+          js = "\n".join([
+            '<!-- GODIVA_JOURNEY_FUNNEL_V1 -->',
+            '<script>',
+            '(()=>{',
+            "const root=document.getElementById('cg');if(!root)return;",
+            "const target=[...root.querySelectorAll('.ct')].find(el=>el.textContent.includes('品牌可见度不足')&&el.textContent.includes('本地相关性不足')&&el.textContent.includes('高端体验不一致'));if(!target)return;",
+            "const block=target.closest('.block');if(block)block.classList.add('godiva-journey-block');",
+            "target.innerHTML=`<h2>消费者旅程困境</h2><div class=\"journey-map\" aria-label=\"GODIVA消费者旅程困境与解决方案\"><div class=\"journey-funnel\"><div class=\"funnel-stage\"><span>认知 / 兴趣</span><strong>品牌可见度不足</strong></div><div class=\"funnel-stage\"><span>考虑</span><strong>本地相关性不足</strong></div><div class=\"funnel-stage\"><span>购买 / 履约</span><strong>高端体验不一致</strong></div><div class=\"funnel-stage\"><span>复购 / 留存</span><strong>负面体验影响复购</strong></div></div><div class=\"journey-solutions\"><div class=\"solution-row\"><strong>提升品牌曝光</strong><p>搜索与社媒协同触达</p></div><div class=\"solution-row\"><strong>建立本地关联</strong><p>本地化内容连接英国消费场景</p></div><div class=\"solution-row\"><strong>修复消费体验</strong><p>优化包装、配送与客服</p></div><div class=\"solution-row\"><strong>强化客户关系</strong><p>售后跟进与复购运营</p></div></div></div>`;",
+            '})();',
+            '</script>',
+            '<!-- END_GODIVA_JOURNEY_FUNNEL_V1 -->'
+          ]) + "\n"
 
           s = re.sub(r'<!-- GODIVA_JOURNEY_FUNNEL_V1 -->.*?<!-- END_GODIVA_JOURNEY_FUNNEL_V1 -->', '', s, flags=re.S)
           s = s.replace('</body>', js + '</body>', 1)
-
           p.write_text(s, encoding='utf-8')
           PY
 
