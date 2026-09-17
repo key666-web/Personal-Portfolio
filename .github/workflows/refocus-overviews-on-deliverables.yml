@@ -1,4 +1,4 @@
-name: Build true black and white GODIVA funnel
+name: Apply true black and white GODIVA funnel
 
 on:
   push:
@@ -14,71 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Redesign GODIVA journey as a real funnel
+      - name: Patch GODIVA funnel
         shell: bash
         run: |
-          set -euo pipefail
-          python - <<'PY'
-          from pathlib import Path
-          import re
-
-          p = Path('index.html')
-          s = p.read_text(encoding='utf-8')
-          assert 'id="cg"' in s, 'GODIVA case #cg not found'
-          assert all(x in s for x in ['品牌可见度不足','本地相关性不足','高端体验不一致']), 'GODIVA journey section not found'
-
-          for v in ('V1','V2','V3'):
-              s = re.sub(r'/\* GODIVA_JOURNEY_FUNNEL_' + v + r' \*/.*?/\* END_GODIVA_JOURNEY_FUNNEL_' + v + r' \*/', '', s, flags=re.S)
-              s = re.sub(r'<!-- GODIVA_JOURNEY_FUNNEL_' + v + r' -->.*?<!-- END_GODIVA_JOURNEY_FUNNEL_' + v + r' -->', '', s, flags=re.S)
-
-          css = "\n".join([
-            '/* GODIVA_JOURNEY_FUNNEL_V3 */',
-            '#cg .godiva-journey-block .lay{grid-template-columns:1fr;gap:0}',
-            '#cg .godiva-journey-block .lab{display:none}',
-            '#cg .godiva-journey-block .ct{width:100%}',
-            '#cg .godiva-journey-block .ct h2{margin-bottom:34px;max-width:none}',
-            '#cg .journey-funnel-v3{display:grid;grid-template-columns:minmax(420px,.98fr) minmax(320px,.82fr);gap:54px;align-items:start;max-width:980px}',
-            '#cg .funnel-v3{display:flex;flex-direction:column;align-items:center;gap:10px;width:100%;padding:2px 0}',
-            '#cg .fv-stage{position:relative;height:88px;color:#111;display:flex;align-items:center;justify-content:center;text-align:center}',
-            '#cg .fv-stage:nth-child(1){width:100%}',
-            '#cg .fv-stage:nth-child(2){width:84%}',
-            '#cg .fv-stage:nth-child(3){width:68%}',
-            '#cg .fv-stage:nth-child(4){width:52%}',
-            '#cg .fv-stage svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}',
-            '#cg .fv-stage path{fill:#fff;stroke:#111;stroke-width:1.25;vector-effect:non-scaling-stroke}',
-            '#cg .fv-copy{position:relative;z-index:2;padding:0 22px;display:flex;flex-direction:column;align-items:center;justify-content:center}',
-            '#cg .fv-kicker{font-size:10px;line-height:1.25;color:#111;margin-bottom:6px;letter-spacing:.02em}',
-            '#cg .fv-issue{font-size:17px;line-height:1.22;font-weight:700;letter-spacing:-.025em;color:#111}',
-            '#cg .fv-solutions{display:grid;grid-template-rows:repeat(4,88px);gap:10px;padding-top:2px}',
-            '#cg .fv-solution{position:relative;display:flex;align-items:center;padding-left:66px;color:#111}',
-            '#cg .fv-solution:before{content:"";position:absolute;left:0;top:50%;width:46px;border-top:1px solid #111}',
-            '#cg .fv-solution:after{content:"";position:absolute;left:45px;top:calc(50% - 2px);width:5px;height:5px;border:1px solid #111;background:#fff;border-radius:50%}',
-            '#cg .fv-solution strong{display:block;font-size:15px;line-height:1.2;color:#111;margin-bottom:5px;letter-spacing:-.015em}',
-            '#cg .fv-solution p{margin:0!important;color:#111!important;font-size:11.5px!important;line-height:1.4!important;max-width:260px!important}',
-            '@media(max-width:820px){#cg .journey-funnel-v3{grid-template-columns:1fr;gap:26px;max-width:640px}#cg .fv-solutions{grid-template-rows:none;gap:12px}#cg .fv-solution{min-height:58px;padding-left:54px}#cg .fv-solution:before{width:36px}#cg .fv-solution:after{left:35px}}',
-            '@media(max-width:520px){#cg .godiva-journey-block .ct h2{margin-bottom:26px}#cg .journey-funnel-v3{grid-template-columns:minmax(0,1fr)}#cg .fv-stage{height:80px}#cg .fv-stage:nth-child(2){width:88%}#cg .fv-stage:nth-child(3){width:76%}#cg .fv-stage:nth-child(4){width:64%}#cg .fv-copy{padding:0 12px}#cg .fv-issue{font-size:15px}#cg .fv-kicker{font-size:9px}}',
-            '/* END_GODIVA_JOURNEY_FUNNEL_V3 */'
-          ]) + "\n"
-          s = s.replace('</style>', css + '</style>', 1)
-
-          js = "\n".join([
-            '<!-- GODIVA_JOURNEY_FUNNEL_V3 -->',
-            '<script>',
-            '(()=>{',
-            "const root=document.getElementById('cg');if(!root)return;",
-            "const target=[...root.querySelectorAll('.ct')].find(el=>el.textContent.includes('品牌可见度不足')&&el.textContent.includes('本地相关性不足')&&el.textContent.includes('高端体验不一致'));if(!target)return;",
-            "const block=target.closest('.block');if(block)block.classList.add('godiva-journey-block');",
-            "const shape='<svg viewBox=\"0 0 520 88\" preserveAspectRatio=\"none\" aria-hidden=\"true\"><path d=\"M18 7 Q260 -2 502 7 L470 79 Q260 89 50 79 Z\"/></svg>';",
-            "target.innerHTML='<h2>消费者旅程困境</h2><div class=\"journey-funnel-v3\" aria-label=\"GODIVA 消费者旅程困境与对应解决方案\"><div class=\"funnel-v3\"><div class=\"fv-stage\">'+shape+'<div class=\"fv-copy\"><span class=\"fv-kicker\">认知 / 兴趣</span><strong class=\"fv-issue\">品牌可见度不足</strong></div></div><div class=\"fv-stage\">'+shape+'<div class=\"fv-copy\"><span class=\"fv-kicker\">考虑</span><strong class=\"fv-issue\">本地相关性不足</strong></div></div><div class=\"fv-stage\">'+shape+'<div class=\"fv-copy\"><span class=\"fv-kicker\">购买 / 履约</span><strong class=\"fv-issue\">高端体验不一致</strong></div></div><div class=\"fv-stage\">'+shape+'<div class=\"fv-copy\"><span class=\"fv-kicker\">复购 / 留存</span><strong class=\"fv-issue\">负面体验影响复购</strong></div></div></div><div class=\"fv-solutions\" aria-label=\"对应解决方案\"><div class=\"fv-solution\"><div><strong>提升品牌曝光</strong><p>强化搜索与社媒触点</p></div></div><div class=\"fv-solution\"><div><strong>建立本地关联</strong><p>以本地化内容连接英国消费场景</p></div></div><div class=\"fv-solution\"><div><strong>修复消费体验</strong><p>优化包装、配送与客服</p></div></div><div class=\"fv-solution\"><div><strong>强化客户关系</strong><p>售后跟进与复购运营</p></div></div></div></div>';",
-            '})();',
-            '</script>',
-            '<!-- END_GODIVA_JOURNEY_FUNNEL_V3 -->'
-          ]) + "\n"
-          s = s.replace('</body>', js + '</body>', 1)
-          p.write_text(s, encoding='utf-8')
-          PY
-
-      - name: Commit GODIVA funnel redesign
+          echo 'CmZyb20gcGF0aGxpYiBpbXBvcnQgUGF0aAppbXBvcnQgcmUKCnAgPSBQYXRoKCJpbmRleC5odG1sIikKcyA9IHAucmVhZF90ZXh0KGVuY29kaW5nPSJ1dGYtOCIpCmFzc2VydCAnaWQ9ImNnIicgaW4gcywgIkdPRElWQSBjYXNlICNjZyBub3QgZm91bmQiCmFzc2VydCBhbGwoeCBpbiBzIGZvciB4IGluIFsi5ZOB54mM5Y+v6KeB5bqm5LiN6LazIiwi5pys5Zyw55u45YWz5oCn5LiN6LazIiwi6auY56uv5L2T6aqM5LiN5LiA6Ie0Il0pLCAiR09ESVZBIGpvdXJuZXkgc2VjdGlvbiBub3QgZm91bmQiCgpzID0gcmUuc3ViKHInL1wqIEdPRElWQV9KT1VSTkVZX0ZVTk5FTF9WXGQrIFwqLy4qPy9cKiBFTkRfR09ESVZBX0pPVVJORVlfRlVOTkVMX1ZcZCsgXCovJywgJycsIHMsIGZsYWdzPXJlLlMpCnMgPSByZS5zdWIocic8IS0tIEdPRElWQV9KT1VSTkVZX0ZVTk5FTF9WXGQrIC0tPi4qPzwhLS0gRU5EX0dPRElWQV9KT1VSTkVZX0ZVTk5FTF9WXGQrIC0tPicsICcnLCBzLCBmbGFncz1yZS5TKQoKY3NzID0gcicnJwovKiBHT0RJVkFfSk9VUk5FWV9GVU5ORUxfVjQgKi8KI2NnIC5nb2RpdmEtam91cm5leS1ibG9jayAubGF5e2dyaWQtdGVtcGxhdGUtY29sdW1uczoxZnI7Z2FwOjB9CiNjZyAuZ29kaXZhLWpvdXJuZXktYmxvY2sgLmxhYntkaXNwbGF5Om5vbmV9CiNjZyAuZ29kaXZhLWpvdXJuZXktYmxvY2sgLmN0e3dpZHRoOjEwMCV9CiNjZyAuZ29kaXZhLWpvdXJuZXktYmxvY2sgLmN0IGgye21hcmdpbi1ib3R0b206MzRweDttYXgtd2lkdGg6bm9uZX0KI2NnIC5qb3VybmV5LWZ1bm5lbC12NHtkaXNwbGF5OmdyaWQ7Z3JpZC10ZW1wbGF0ZS1jb2x1bW5zOm1pbm1heCgwLDEuMDhmcikgbWlubWF4KDI4MHB4LC45MmZyKTtnYXA6NThweDthbGlnbi1pdGVtczpzdGFydDttYXgtd2lkdGg6OTgwcHh9CiNjZyAuZnVubmVsLXY0e2Rpc3BsYXk6ZmxleDtmbGV4LWRpcmVjdGlvbjpjb2x1bW47YWxpZ24taXRlbXM6Y2VudGVyO2dhcDo4cHg7d2lkdGg6MTAwJX0KI2NnIC5mdjQtc3RhZ2V7cG9zaXRpb246cmVsYXRpdmU7aGVpZ2h0Ojg2cHg7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6Y2VudGVyO3RleHQtYWxpZ246Y2VudGVyO2NvbG9yOiMxMTF9CiNjZyAuZnY0LXN0YWdlOm50aC1jaGlsZCgxKXt3aWR0aDoxMDAlfQojY2cgLmZ2NC1zdGFnZTpudGgtY2hpbGQoMil7d2lkdGg6ODQlfQojY2cgLmZ2NC1zdGFnZTpudGgtY2hpbGQoMyl7d2lkdGg6NjglfQojY2cgLmZ2NC1zdGFnZTpudGgtY2hpbGQoNCl7d2lkdGg6NTIlfQojY2cgLmZ2NC1zdGFnZSBzdmd7cG9zaXRpb246YWJzb2x1dGU7aW5zZXQ6MDt3aWR0aDoxMDAlO2hlaWdodDoxMDAlO292ZXJmbG93OnZpc2libGV9CiNjZyAuZnY0LXN0YWdlIHBhdGh7ZmlsbDojZmZmO3N0cm9rZTojMTExO3N0cm9rZS13aWR0aDoxLjE1O3ZlY3Rvci1lZmZlY3Q6bm9uLXNjYWxpbmctc3Ryb2tlfQojY2cgLmZ2NC1jb3B5e3Bvc2l0aW9uOnJlbGF0aXZlO3otaW5kZXg6MjtkaXNwbGF5OmZsZXg7ZmxleC1kaXJlY3Rpb246Y29sdW1uO2FsaWduLWl0ZW1zOmNlbnRlcjtqdXN0aWZ5LWNvbnRlbnQ6Y2VudGVyO3BhZGRpbmc6MCAyMHB4fQojY2cgLmZ2NC1raWNrZXJ7Zm9udC1zaXplOjEwcHg7bGluZS1oZWlnaHQ6MS4yO2ZvbnQtd2VpZ2h0OjUwMDttYXJnaW4tYm90dG9tOjZweDtjb2xvcjojMTExfQojY2cgLmZ2NC1pc3N1ZXtmb250LXNpemU6MTdweDtsaW5lLWhlaWdodDoxLjI7Zm9udC13ZWlnaHQ6ODAwO2xldHRlci1zcGFjaW5nOi0uMDI1ZW07Y29sb3I6IzExMX0KI2NnIC5mdjQtc29sdXRpb25ze2Rpc3BsYXk6Z3JpZDtncmlkLXRlbXBsYXRlLXJvd3M6cmVwZWF0KDQsODZweCk7Z2FwOjhweH0KI2NnIC5mdjQtc29sdXRpb257cG9zaXRpb246cmVsYXRpdmU7ZGlzcGxheTpmbGV4O2FsaWduLWl0ZW1zOmNlbnRlcjtwYWRkaW5nLWxlZnQ6NjJweDtjb2xvcjojMTExfQojY2cgLmZ2NC1zb2x1dGlvbjpiZWZvcmV7Y29udGVudDoiIjtwb3NpdGlvbjphYnNvbHV0ZTtsZWZ0OjA7dG9wOjUwJTt3aWR0aDo0MnB4O2JvcmRlci10b3A6MXB4IHNvbGlkICMxMTF9CiNjZyAuZnY0LXNvbHV0aW9uOmFmdGVye2NvbnRlbnQ6IiI7cG9zaXRpb246YWJzb2x1dGU7bGVmdDo0MXB4O3RvcDpjYWxjKDUwJSAtIDJweCk7d2lkdGg6NHB4O2hlaWdodDo0cHg7YmFja2dyb3VuZDojMTExO2JvcmRlci1yYWRpdXM6NTAlfQojY2cgLmZ2NC1zb2x1dGlvbiBzdHJvbmd7ZGlzcGxheTpibG9jaztmb250LXNpemU6MTdweDtsaW5lLWhlaWdodDoxLjI7bGV0dGVyLXNwYWNpbmc6LS4wMmVtO21hcmdpbi1ib3R0b206NXB4O2NvbG9yOiMxMTF9CiNjZyAuZnY0LXNvbHV0aW9uIHB7bWFyZ2luOjAhaW1wb3J0YW50O21heC13aWR0aDoyOTBweCFpbXBvcnRhbnQ7Zm9udC1zaXplOjExLjVweCFpbXBvcnRhbnQ7bGluZS1oZWlnaHQ6MS40NSFpbXBvcnRhbnQ7Y29sb3I6IzU1NSFpbXBvcnRhbnR9CkBtZWRpYShtYXgtd2lkdGg6ODIwcHgpewogICNjZyAuam91cm5leS1mdW5uZWwtdjR7Z3JpZC10ZW1wbGF0ZS1jb2x1bW5zOjFmcjtnYXA6MjRweDttYXgtd2lkdGg6NjIwcHh9CiAgI2NnIC5mdjQtc29sdXRpb25ze2dyaWQtdGVtcGxhdGUtcm93czpub25lO2dhcDo4cHh9CiAgI2NnIC5mdjQtc29sdXRpb257bWluLWhlaWdodDo1OHB4O3BhZGRpbmctbGVmdDo1MnB4fQogICNjZyAuZnY0LXNvbHV0aW9uOmJlZm9yZXt3aWR0aDozNHB4fQogICNjZyAuZnY0LXNvbHV0aW9uOmFmdGVye2xlZnQ6MzNweH0KfQpAbWVkaWEobWF4LXdpZHRoOjUyMHB4KXsKICAjY2cgLmdvZGl2YS1qb3VybmV5LWJsb2NrIC5jdCBoMnttYXJnaW4tYm90dG9tOjI2cHh9CiAgI2NnIC5mdjQtc3RhZ2V7aGVpZ2h0Ojc4cHh9CiAgI2NnIC5mdjQtc3RhZ2U6bnRoLWNoaWxkKDIpe3dpZHRoOjg4JX0KICAjY2cgLmZ2NC1zdGFnZTpudGgtY2hpbGQoMyl7d2lkdGg6NzYlfQogICNjZyAuZnY0LXN0YWdlOm50aC1jaGlsZCg0KXt3aWR0aDo2NCV9CiAgI2NnIC5mdjQtY29weXtwYWRkaW5nOjAgMTBweH0KICAjY2cgLmZ2NC1pc3N1ZXtmb250LXNpemU6MTVweH0KICAjY2cgLmZ2NC1raWNrZXJ7Zm9udC1zaXplOjlweH0KfQovKiBFTkRfR09ESVZBX0pPVVJORVlfRlVOTkVMX1Y0ICovCicnJwpzID0gcy5yZXBsYWNlKCI8L3N0eWxlPiIsIGNzcyArICI8L3N0eWxlPiIsIDEpCgpqcyA9IHInJycKPCEtLSBHT0RJVkFfSk9VUk5FWV9GVU5ORUxfVjQgLS0+CjxzY3JpcHQ+CigoKT0+ewogIGNvbnN0IHJvb3Q9ZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2NnJyk7IGlmKCFyb290KSByZXR1cm47CiAgY29uc3QgdGFyZ2V0PVsuLi5yb290LnF1ZXJ5U2VsZWN0b3JBbGwoJy5jdCcpXS5maW5kKGVsID0+CiAgICBlbC50ZXh0Q29udGVudC5pbmNsdWRlcygn5ZOB54mM5Y+v6KeB5bqm5LiN6LazJykgJiYKICAgIGVsLnRleHRDb250ZW50LmluY2x1ZGVzKCfmnKzlnLDnm7jlhbPmgKfkuI3otrMnKSAmJgogICAgZWwudGV4dENvbnRlbnQuaW5jbHVkZXMoJ+mrmOerr+S9k+mqjOS4jeS4gOiHtCcpCiAgKTsKICBpZighdGFyZ2V0KSByZXR1cm47CiAgY29uc3QgYmxvY2s9dGFyZ2V0LmNsb3Nlc3QoJy5ibG9jaycpOyBpZihibG9jaykgYmxvY2suY2xhc3NMaXN0LmFkZCgnZ29kaXZhLWpvdXJuZXktYmxvY2snKTsKICBjb25zdCBzaGFwZT1gPHN2ZyB2aWV3Qm94PSIwIDAgNTIwIDg2IiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJub25lIiBhcmlhLWhpZGRlbj0idHJ1ZSI+PHBhdGggZD0iTTI0IDUgUTI2MCAtMyA0OTYgNSBMNDYyIDc4IFEyNjAgODggNTggNzggWiIvPjwvc3ZnPmA7CiAgdGFyZ2V0LmlubmVySFRNTD1gCiAgICA8aDI+5raI6LS56ICF5peF56iL5Zuw5aKDPC9oMj4KICAgIDxkaXYgY2xhc3M9ImpvdXJuZXktZnVubmVsLXY0IiBhcmlhLWxhYmVsPSJHT0RJVkEg5raI6LS56ICF5peF56iL5Zuw5aKD5LiO5a+55bqU6Kej5Yaz5pa55qGIIj4KICAgICAgPGRpdiBjbGFzcz0iZnVubmVsLXY0Ij4KICAgICAgICA8ZGl2IGNsYXNzPSJmdjQtc3RhZ2UiPiR7c2hhcGV9PGRpdiBjbGFzcz0iZnY0LWNvcHkiPjxzcGFuIGNsYXNzPSJmdjQta2lja2VyIj7orqTnn6UgLyDlhbTotqM8L3NwYW4+PHN0cm9uZyBjbGFzcz0iZnY0LWlzc3VlIj7lk4HniYzlj6/op4HluqbkuI3otrM8L3N0cm9uZz48L2Rpdj48L2Rpdj4KICAgICAgICA8ZGl2IGNsYXNzPSJmdjQtc3RhZ2UiPiR7c2hhcGV9PGRpdiBjbGFzcz0iZnY0LWNvcHkiPjxzcGFuIGNsYXNzPSJmdjQta2lja2VyIj7ogIPomZE8L3NwYW4+PHN0cm9uZyBjbGFzcz0iZnY0LWlzc3VlIj7mnKzlnLDnm7jlhbPmgKfkuI3otrM8L3N0cm9uZz48L2Rpdj48L2Rpdj4KICAgICAgICA8ZGl2IGNsYXNzPSJmdjQtc3RhZ2UiPiR7c2hhcGV9PGRpdiBjbGFzcz0iZnY0LWNvcHkiPjxzcGFuIGNsYXNzPSJmdjQta2lja2VyIj7otK3kubAgLyDlsaXnuqY8L3NwYW4+PHN0cm9uZyBjbGFzcz0iZnY0LWlzc3VlIj7pq5jnq6/kvZPpqozkuI3kuIDoh7Q8L3N0cm9uZz48L2Rpdj48L2Rpdj4KICAgICAgICA8ZGl2IGNsYXNzPSJmdjQtc3RhZ2UiPiR7c2hhcGV9PGRpdiBjbGFzcz0iZnY0LWNvcHkiPjxzcGFuIGNsYXNzPSJmdjQta2lja2VyIj7lpI3otK0gLyDnlZnlrZg8L3NwYW4+PHN0cm9uZyBjbGFzcz0iZnY0LWlzc3VlIj7otJ/pnaLkvZPpqozlvbHlk43lpI3otK08L3N0cm9uZz48L2Rpdj48L2Rpdj4KICAgICAgPC9kaXY+CiAgICAgIDxkaXYgY2xhc3M9ImZ2NC1zb2x1dGlvbnMiIGFyaWEtbGFiZWw9IuWvueW6lOino+WGs+aWueahiCI+CiAgICAgICAgPGRpdiBjbGFzcz0iZnY0LXNvbHV0aW9uIj48ZGl2PjxzdHJvbmc+5o+Q5Y2H5ZOB54mM5pud5YWJPC9zdHJvbmc+PHA+5by65YyW5pCc57Si5LiO56S+5aqS6Kem54K5PC9wPjwvZGl2PjwvZGl2PgogICAgICAgIDxkaXYgY2xhc3M9ImZ2NC1zb2x1dGlvbiI+PGRpdj48c3Ryb25nPuW7uueri+acrOWcsOWFs+iBlDwvc3Ryb25nPjxwPuS7peacrOWcsOWMluWGheWuuei/nuaOpeiLseWbvea2iOi0ueWcuuaZrzwvcD48L2Rpdj48L2Rpdj4KICAgICAgICA8ZGl2IGNsYXNzPSJmdjQtc29sdXRpb24iPjxkaXY+PHN0cm9uZz7kv67lpI3mtojotLnkvZPpqow8L3N0cm9uZz48cD7kvJjljJbljIXoo4XjgIHphY3pgIHkuI7lrqLmnI08L3A+PC9kaXY+PC9kaXY+CiAgICAgICAgPGRpdiBjbGFzcz0iZnY0LXNvbHV0aW9uIj48ZGl2PjxzdHJvbmc+5by65YyW5a6i5oi35YWz57O7PC9zdHJvbmc+PHA+5ZSu5ZCO6Lef6L+b5LiO5aSN6LSt6L+Q6JClPC9wPjwvZGl2PjwvZGl2PgogICAgICA8L2Rpdj4KICAgIDwvZGl2PmA7Cn0pKCk7Cjwvc2NyaXB0Pgo8IS0tIEVORF9HT0RJVkFfSk9VUk5FWV9GVU5ORUxfVjQgLS0+CicnJwpzID0gcy5yZXBsYWNlKCI8L2JvZHk+IiwganMgKyAiPC9ib2R5PiIsIDEpCnAud3JpdGVfdGV4dChzLCBlbmNvZGluZz0idXRmLTgiKQo=' | base64 -d > /tmp/patch.py
+          python /tmp/patch.py
+      - name: Commit funnel redesign
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
